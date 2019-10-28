@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+
+  masterchef-bot:
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Dev.Dockerfile
+
+    environment:
+      API_KEY: "${API_KEY}"
+      DEBUG_MODE: "true"
+      
+    volumes:
+      - ./:/go/masterchef-bot

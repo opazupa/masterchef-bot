@@ -4,9 +4,16 @@ import (
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/joho/godotenv"
 
 	"masterchef_bot/cmd/configuration"
 )
+
+// init is invoked before main()
+func init() {
+	// loads values from .env into the system if present
+	godotenv.Load()
+}
 
 func main() {
 
