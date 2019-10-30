@@ -11,11 +11,11 @@ type Configuration struct {
 	DebugMode bool
 }
 
-// Get struct
+// Get configuration
 func Get() *Configuration {
 	return &Configuration{
 		APIKey:    getEnv("API_KEY", ""),
-		DebugMode: getEnvAsBool("DEBUG_MODE", true),
+		DebugMode: getEnvAsBool("DEBUG_MODE", false),
 	}
 }
 
