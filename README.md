@@ -6,6 +6,12 @@ I'm a **`MasterChefBot`** and ready to help you in the kitchen!
 
 ## Start up :rocket:
 
+Configuration
+```
+    API_KEY: <your-bot-api-key>
+    DEBUG_MODE: true/false
+```
+
 ## Cooking :pizza:
 
 ### Development
