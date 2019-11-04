@@ -13,5 +13,5 @@ FROM alpine:latest
 
 COPY --from=builder /go/app /app
 
-EXPOSE 5555
+EXPOSE 80
 CMD ["/app"]
