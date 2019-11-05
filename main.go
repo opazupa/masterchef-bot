@@ -6,7 +6,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
 
-	"masterchef_bot/cmd/configuration"
+	"masterchef_bot/bocmd/configuration"
 )
 
 // init is invoked before main()
@@ -15,6 +15,7 @@ func init() {
 	godotenv.Load()
 }
 
+// Main
 func main() {
 
 	configuration := configuration.Get()
