@@ -12,7 +12,7 @@
 *.out
 
 # Build output
-bin/*
+**/bin/
 # Env files
 .env
 

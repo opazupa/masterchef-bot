@@ -6,7 +6,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
 
-	"masterchef_bot/cmd/configuration"
+	"masterchef_bot/internal/configuration"
 )
 
 // init is invoked before main()
@@ -22,7 +22,6 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-
 	bot.Debug = configuration.DebugMode
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
