@@ -6,7 +6,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
 
-	"masterchef_bot/internal/configuration"
+	"masterchef_bot/pkg/configuration"
 )
 
 // init is invoked before main()
