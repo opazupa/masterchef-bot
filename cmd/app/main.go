@@ -49,18 +49,15 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 	if err != nil {
 		log.Printf("Failed to get update feed.")
 	}
-
 	for update := range updates {
 
 		if update.InlineQuery != nil {
 			inlinequery.Handle(&update)
 		} else if update.Message.IsCommand() && update.Message != nil {
-			command.Handle(&update)
+			msg, err := command.Handle(&update)
+			if err == nil {
+				bot.Send(msg)
+			}
 		}
-
-		// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		// msg.ReplyToMessageID = update.Message.MessageID
-
-		// bot.Send(msg)
 	}
 }
