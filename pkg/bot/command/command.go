@@ -49,17 +49,17 @@ Let’s start cooking ay? 🔥
 }
 
 // Handle command for bot
-func Handle(update *tgbotapi.Update) (*tgbotapi.MessageConfig, error) {
+func Handle(update *tgbotapi.Update) (msg *tgbotapi.MessageConfig, err error) {
 
-	var msg tgbotapi.MessageConfig
+	var reply tgbotapi.MessageConfig
 
 	switch update.Message.Command() {
 	case strings.ToLower(commands.Help.Key):
-		msg = tgbotapi.NewMessage(update.Message.Chat.ID, commands.Help.Description)
+		reply = tgbotapi.NewMessage(update.Message.Chat.ID, commands.Help.Description)
 	case strings.ToLower(commands.Start.Key):
-		msg = tgbotapi.NewMessage(update.Message.Chat.ID, commands.Start.Description)
+		reply = tgbotapi.NewMessage(update.Message.Chat.ID, commands.Start.Description)
 	default:
 		return nil, fmt.Errorf("Unregocnized command %s from user  [%s]", update.Message.Command(), update.Message.From.UserName)
 	}
-	return &msg, nil
+	return &reply, nil
 }
