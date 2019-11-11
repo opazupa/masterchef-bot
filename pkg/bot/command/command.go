@@ -31,7 +31,7 @@ Start with /start command.
 
 Recipe search
 Search for recipes by calling
-@Mc_Recipe_Bot and then by typing recipe.
+@%s and then by typing recipe.
 
 Services
 - list of service coming up here
@@ -49,17 +49,17 @@ Let’s start cooking ay? 🔥
 }
 
 // Handle command for bot
-func Handle(update *tgbotapi.Update) (msg *tgbotapi.MessageConfig, err error) {
+func Handle(update *tgbotapi.Update, botName string) (msg *tgbotapi.MessageConfig, err error) {
 
 	var reply tgbotapi.MessageConfig
 
 	switch update.Message.Command() {
 	case strings.ToLower(commands.Help.Key):
-		reply = tgbotapi.NewMessage(update.Message.Chat.ID, commands.Help.Description)
+		reply = tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf(commands.Help.Description, botName))
 	case strings.ToLower(commands.Start.Key):
 		reply = tgbotapi.NewMessage(update.Message.Chat.ID, commands.Start.Description)
 	default:
-		return nil, fmt.Errorf("Unregocnized command %s from user  [%s]", update.Message.Command(), update.Message.From.UserName)
+		return nil, fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
 	}
 	return &reply, nil
 }
