@@ -58,6 +58,7 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 				Results:       *results,
 			}
 			bot.AnswerInlineQuery(response)
+
 		} else if update.Message.IsCommand() && update.Message != nil {
 			msg, err := command.Handle(&update, bot.Self.UserName)
 			if err == nil {

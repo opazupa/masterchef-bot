@@ -3,7 +3,6 @@ package inlinequery
 import (
 	"log"
 	"masterchef_bot/pkg/duckduckgoapi"
-	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -24,13 +23,16 @@ func Handle(update *tgbotapi.Update) *[]interface{} {
 func toInlineQueryResult(recipes *[]duckduckgoapi.Recipe) *[]interface{} {
 
 	results := make([]interface{}, len(*recipes))
-	for i := 1; i < 5; i++ {
-		x := tgbotapi.NewInlineQueryResultArticle(strconv.Itoa(i), "title"+string(i), "https://www.k-ruoka.fi/reseptit/palak-paneer")
-		x.URL = "https://www.k-ruoka.fi/reseptit/palak-paneer"
-		x.HideURL = true
-		x.Description = "moi"
+	// for i := 1; i < 10; i++ {
+	// 	x := tgbotapi.NewInlineQueryResultArticle(strconv.Itoa(i), "title"+string(i), "https://www.k-ruoka.fi/reseptit/palak-paneer")
+	// 	x.URL = "https://www.k-ruoka.fi/reseptit/palak-paneer"
+	// 	x.HideURL = true
+	// 	x.ThumbWidth = 16
+	// 	x.ThumbHeight = 16
+	// 	x.ThumbURL = "https://duckduckgo.com/ip3/yhteishyva.fi.ico"
+	// 	x.Description = "moi"
 
-		results = append(results, x)
-	}
+	// 	results = append(results, x)
+	// }
 	return &results
 }
