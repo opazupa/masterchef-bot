@@ -26,7 +26,7 @@ const (
 // SearchRecipes from duckduckgo API
 func SearchRecipes(recipe string) (recipes *[]Recipe) {
 
-	// Get search ressults from duckduckgo
+	// Get search results from duckduckgo
 	html, err := getDuckDuckGoSearchResult(recipe)
 	if err != nil {
 		return &[]Recipe{}
