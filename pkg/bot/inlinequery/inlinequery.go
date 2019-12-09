@@ -2,9 +2,14 @@ package inlinequery
 
 import (
 	"log"
-	"masterchef_bot/pkg/duckduckgoapi"
+	"masterchef_bot/pkg/recipeapi"
+	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
+const (
+	resultLimit = 10
 )
 
 // Handle inline query for the bot
@@ -15,24 +20,30 @@ func Handle(update *tgbotapi.Update) *[]interface{} {
 		// Return maybe some trending results here
 		return &[]interface{}{}
 	}
-	results := duckduckgoapi.SearchRecipes(update.InlineQuery.Query)
+	results := recipeapi.SearchRecipes(update.InlineQuery.Query)
 	return toInlineQueryResult(results)
 }
 
-// Convert google search results to InlineQueryResults
-func toInlineQueryResult(recipes *[]duckduckgoapi.Recipe) *[]interface{} {
+// Convert recipe results to InlineQueryResults
+func toInlineQueryResult(recipes *[]recipeapi.Recipe) *[]interface{} {
 
-	results := make([]interface{}, len(*recipes))
-	// for i := 1; i < 10; i++ {
-	// 	x := tgbotapi.NewInlineQueryResultArticle(strconv.Itoa(i), "title"+string(i), "https://www.k-ruoka.fi/reseptit/palak-paneer")
-	// 	x.URL = "https://www.k-ruoka.fi/reseptit/palak-paneer"
-	// 	x.HideURL = true
-	// 	x.ThumbWidth = 16
-	// 	x.ThumbHeight = 16
-	// 	x.ThumbURL = "https://duckduckgo.com/ip3/yhteishyva.fi.ico"
-	// 	x.Description = "moi"
+	results := make([]interface{}, 0)
+	for i, recipe := range (*recipes)[:resultLimit] {
+		results = append(results, tgbotapi.InlineQueryResultArticle{
+			Type:  "article",
+			ID:    strconv.Itoa(i + 1),
+			Title: recipe.Title,
+			InputMessageContent: tgbotapi.InputTextMessageContent{
+				Text: recipe.URL,
+			},
+			URL:         recipe.URL,
+			ThumbHeight: 8,
+			ThumbWidth:  8,
+			ThumbURL:    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcCPYO-yVEALy1NE2deQtHC2uOy091lUvRPyFWEUyE0xlgsNm8&s",
+			HideURL:     true,
+			Description: recipe.Description,
+		})
+	}
 
-	// 	results = append(results, x)
-	// }
 	return &results
 }
