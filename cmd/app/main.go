@@ -51,7 +51,10 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 	}
 	for update := range updates {
 
+		// Check if the user is registered!
+
 		if update.InlineQuery != nil {
+			// When user searches recipes with inline query
 			results := inlinequery.Handle(&update)
 			response := tgbotapi.InlineConfig{
 				InlineQueryID: update.InlineQuery.ID,
@@ -59,7 +62,12 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 			}
 			bot.AnswerInlineQuery(response)
 
+			// If user is signed in let to save the result
+		} else if update.CallbackQuery != nil {
+			// When user interacts with inline buttons
+			log.Print("Call back query:", update.CallbackQuery.Data)
 		} else if update.Message.IsCommand() && update.Message != nil {
+			// When user enter a command
 			msg, err := command.Handle(&update, bot.Self.UserName)
 			if err == nil {
 				bot.Send(msg)
