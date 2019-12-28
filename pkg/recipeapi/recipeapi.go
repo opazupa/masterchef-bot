@@ -49,6 +49,7 @@ func getDuckDuckGoSearchResult(query string) (*goquery.Document, error) {
 	html, err := goquery.NewDocumentFromReader(response.Body)
 	if err != nil {
 		log.Printf("Failed to parse search results from duckduckgo. %s", err)
+		return nil, err
 	}
 	return html, nil
 }

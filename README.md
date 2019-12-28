@@ -8,7 +8,7 @@ I'm a **`MasterChefBot`** and ready to help you in the kitchen!
 
 Configuration
 ```
-    API_KEY: <your-bot-api-key>
+    API_KEY: "<your-bot-api-key>"
     DEBUG_MODE: true/false
 ```
 
