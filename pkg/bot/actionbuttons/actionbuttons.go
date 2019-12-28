@@ -2,7 +2,7 @@ package actionbuttons
 
 const (
 	// SaveAction for save recipe buttons
-	SaveAction = "Save 👊"
+	SaveAction string = "Save 👊"
 	// RegisterAction for registr user button
-	RegisterAction = "Hop on 👌"
+	RegisterAction string = "Hop on 👌"
 )

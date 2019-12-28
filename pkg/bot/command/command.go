@@ -7,7 +7,6 @@ import (
 	"masterchef_bot/pkg/bot/actionbuttons"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Command type
@@ -58,7 +57,7 @@ to store your name and telegram id.
 }
 
 // Handle command for bot
-func Handle(update *tgbotapi.Update, db *mongo.Database, botName string) (msg *tgbotapi.MessageConfig, err error) {
+func Handle(update *tgbotapi.Update, botName string) (msg *tgbotapi.MessageConfig, err error) {
 
 	var reply tgbotapi.MessageConfig
 
@@ -69,7 +68,7 @@ func Handle(update *tgbotapi.Update, db *mongo.Database, botName string) (msg *t
 		reply = tgbotapi.NewMessage(update.Message.Chat.ID, commands.Start.Description)
 		// Give option to register to new users
 		if true {
-			reply.ReplyMarkup = addActionButtons()
+			reply.ReplyMarkup = addActionButtons(update.Message.From.ID)
 		}
 	default:
 		return nil, fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
@@ -77,10 +76,10 @@ func Handle(update *tgbotapi.Update, db *mongo.Database, botName string) (msg *t
 	return &reply, nil
 }
 
-func addActionButtons() *tgbotapi.InlineKeyboardMarkup {
+func addActionButtons(user int) *tgbotapi.InlineKeyboardMarkup {
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(actionbuttons.RegisterAction, ""),
+			tgbotapi.NewInlineKeyboardButtonData(actionbuttons.RegisterAction, fmt.Sprint(user)),
 		),
 	)
 	return &keyboard

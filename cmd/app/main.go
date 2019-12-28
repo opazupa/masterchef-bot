@@ -5,27 +5,26 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	"masterchef_bot/pkg/bot/command"
 	"masterchef_bot/pkg/bot/inlinequery"
 	"masterchef_bot/pkg/configuration"
 	"masterchef_bot/pkg/database"
-	"masterchef_bot/pkg/database/user"
+	"masterchef_bot/pkg/database/usercollection"
 )
 
 // init is invoked before main()
 func init() {
 	// loads values from .env into the system if present
 	godotenv.Load()
+	database.Check()
 }
 
 // Main application
 func main() {
 
 	bot := configureBot()
-	db := database.Get()
-	handleUpdates(bot, db)
+	handleUpdates(bot)
 }
 
 // Configure bot on startup
@@ -43,7 +42,7 @@ func configureBot() *tgbotapi.BotAPI {
 }
 
 // Handle received updates
-func handleUpdates(bot *tgbotapi.BotAPI, db *mongo.Database) {
+func handleUpdates(bot *tgbotapi.BotAPI) {
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -56,7 +55,10 @@ func handleUpdates(bot *tgbotapi.BotAPI, db *mongo.Database) {
 	for update := range updates {
 
 		// Check if the user is registered!
-		registeredUser := user.Get(db, update.Message.From.ID)
+		userID := getUser(update)
+		registeredUser := usercollection.Get(*userID)
+		log.Print(registeredUser)
+		log.Print(registeredUser != nil)
 
 		if update.InlineQuery != nil {
 			// When user searches recipes with inline query
@@ -73,10 +75,24 @@ func handleUpdates(bot *tgbotapi.BotAPI, db *mongo.Database) {
 
 		} else if update.Message.IsCommand() && update.Message != nil {
 			// When user enter a command
-			msg, err := command.Handle(&update, db, bot.Self.UserName)
+			msg, err := command.Handle(&update, bot.Self.UserName)
 			if err == nil {
 				bot.Send(msg)
 			}
 		}
+	}
+}
+
+func getUser(update tgbotapi.Update) (id *int) {
+
+	if update.Message != nil {
+		return &update.Message.From.ID
+	} else if update.InlineQuery != nil {
+		return &update.InlineQuery.From.ID
+	} else if update.CallbackQuery != nil {
+		return &update.CallbackQuery.From.ID
+	} else {
+		log.Print("Unable to find user id from update", update)
+		return nil
 	}
 }
