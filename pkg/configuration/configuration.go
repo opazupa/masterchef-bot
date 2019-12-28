@@ -7,17 +7,19 @@ import (
 
 // Configuration type
 type Configuration struct {
-	APIKey       string
-	DebugMode    bool
-	MasterChefDB string
+	APIKey             string
+	DebugMode          bool
+	DatabaseConnection string
+	DatabaseName       string
 }
 
 // Get configuration
 func Get() *Configuration {
 	return &Configuration{
-		APIKey:       getEnv("API_KEY", ""),
-		DebugMode:    getEnvAsBool("DEBUG_MODE", false),
-		MasterChefDB: getEnv("DatabaseConnection", ""),
+		APIKey:             getEnv("API_KEY", ""),
+		DebugMode:          getEnvAsBool("DEBUG_MODE", false),
+		DatabaseConnection: getEnv("DATABASE_CONNECTION", ""),
+		DatabaseName:       getEnv("DATABASE_NAME", " "),
 	}
 }
 

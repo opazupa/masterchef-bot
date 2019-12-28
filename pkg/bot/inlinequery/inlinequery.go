@@ -1,7 +1,9 @@
 package inlinequery
 
 import (
+	"encoding/json"
 	"log"
+	"masterchef_bot/pkg/bot/actionbuttons"
 	"masterchef_bot/pkg/recipeapi"
 	"strconv"
 
@@ -13,7 +15,7 @@ const (
 )
 
 // Handle inline query for the bot
-func Handle(update *tgbotapi.Update) *[]interface{} {
+func Handle(update *tgbotapi.Update, isRegistered bool) *[]interface{} {
 
 	log.Printf("[%s] Inline query: (%s)", update.InlineQuery.From.UserName, update.InlineQuery.Query)
 	if update.InlineQuery.Query == "" {
@@ -21,11 +23,11 @@ func Handle(update *tgbotapi.Update) *[]interface{} {
 		return &[]interface{}{}
 	}
 	results := recipeapi.SearchRecipes(update.InlineQuery.Query)
-	return toInlineQueryResult(results)
+	return toInlineQueryResult(results, isRegistered)
 }
 
 // Convert recipe results to InlineQueryResults
-func toInlineQueryResult(recipes *[]recipeapi.Recipe) *[]interface{} {
+func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]interface{} {
 
 	results := make([]interface{}, 0)
 	for i, recipe := range (*recipes)[:resultLimit] {
@@ -42,8 +44,24 @@ func toInlineQueryResult(recipes *[]recipeapi.Recipe) *[]interface{} {
 			ThumbURL:    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcCPYO-yVEALy1NE2deQtHC2uOy091lUvRPyFWEUyE0xlgsNm8&s",
 			HideURL:     true,
 			Description: recipe.Description,
+			ReplyMarkup: addActionButtons(isRegistered, recipe),
 		})
 	}
 
 	return &results
+}
+
+func addActionButtons(isRegistered bool, recipe recipeapi.Recipe) *tgbotapi.InlineKeyboardMarkup {
+
+	// Hide buttons if user is not registered
+	if !isRegistered {
+		return nil
+	}
+	json, _ := json.Marshal(recipe)
+	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(actionbuttons.SaveAction, string(json)),
+		),
+	)
+	return &keyboard
 }
