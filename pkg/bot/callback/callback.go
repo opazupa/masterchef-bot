@@ -44,6 +44,10 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string) {
 
 	switch update.CallbackQuery.Data {
 	case RegisteredActions.SaveAction.ID:
+		if user == nil {
+			return "Register first to start collecting recipes."
+		}
+
 		// Save recipe to database
 		recipeParts := strings.Split(update.CallbackQuery.Message.Text, "\n")
 		_, err := recipecollection.Add(recipeParts[0], recipeParts[1], user.ID)
@@ -56,7 +60,7 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string) {
 
 	case RegisteredActions.RegisterAction.ID:
 		if user != nil {
-			return "Already registered."
+			return "You're already registered."
 		}
 
 		// Register user for the bot
