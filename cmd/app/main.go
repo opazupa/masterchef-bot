@@ -6,6 +6,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
 
+	"masterchef_bot/pkg/bot/callback"
 	"masterchef_bot/pkg/bot/command"
 	"masterchef_bot/pkg/bot/inlinequery"
 	"masterchef_bot/pkg/configuration"
@@ -56,7 +57,7 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 
 		// Check if the user is registered!
 		userID := getUser(update)
-		registeredUser := usercollection.Get(*userID)
+		registeredUser := usercollection.Get(userID)
 		log.Print(registeredUser)
 		log.Print(registeredUser != nil)
 
@@ -68,10 +69,21 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 				Results:       *results,
 			}
 			bot.AnswerInlineQuery(response)
+			// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			// msg.ReplyToMessageID = update.Message.MessageID
+			// bot.Send(msg)
 
 		} else if update.CallbackQuery != nil {
 			// When user interacts with inline buttons
-			log.Print("Call back query:", update.CallbackQuery.Data)
+			err := callback.Handle(&update)
+			if err != nil {
+				errMsg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Unknown callback 🧐")
+				bot.Send(errMsg)
+			} else {
+				msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Ok")
+				msg.ReplyToMessageID = update.CallbackQuery.Message.MessageID
+				bot.Send(msg)
+			}
 
 		} else if update.Message.IsCommand() && update.Message != nil {
 			// When user enter a command

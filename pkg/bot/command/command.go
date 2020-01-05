@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"masterchef_bot/pkg/bot/actionbuttons"
+	"masterchef_bot/pkg/bot/callback"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -77,9 +77,11 @@ func Handle(update *tgbotapi.Update, botName string) (msg *tgbotapi.MessageConfi
 }
 
 func addActionButtons(user int) *tgbotapi.InlineKeyboardMarkup {
+
+	registerAction := callback.RegisteredActions.RegisterAction
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(actionbuttons.RegisterAction, fmt.Sprint(user)),
+			tgbotapi.NewInlineKeyboardButtonData(registerAction.Text, registerAction.ID),
 		),
 	)
 	return &keyboard

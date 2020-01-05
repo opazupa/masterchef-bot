@@ -34,13 +34,17 @@ func Create(id int, name string) *User {
 }
 
 // Get user by id
-func Get(id int) *User {
-	filter := bson.D{
-		primitive.E{
-			Key: "ID", Value: id,
-		},
+func Get(id *int) *User {
+
+	if id == nil {
+		return nil
 	}
 
+	filter := bson.D{
+		primitive.E{
+			Key: "ID", Value: *id,
+		},
+	}
 	var result User
 
 	db := database.Get()

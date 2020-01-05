@@ -1,10 +1,9 @@
 package inlinequery
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"masterchef_bot/pkg/bot/actionbuttons"
+	"masterchef_bot/pkg/bot/callback"
 	"masterchef_bot/pkg/recipeapi"
 	"strconv"
 
@@ -58,10 +57,11 @@ func addActionButtons(isRegistered bool, recipe recipeapi.Recipe) *tgbotapi.Inli
 	if !isRegistered {
 		return nil
 	}
-	json, _ := json.Marshal(recipe)
+
+	saveAction := callback.RegisteredActions.SaveAction
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(actionbuttons.SaveAction, fmt.Sprint(json)),
+			tgbotapi.NewInlineKeyboardButtonData(saveAction.Text, fmt.Sprint(saveAction.ID)),
 		),
 	)
 	return &keyboard
