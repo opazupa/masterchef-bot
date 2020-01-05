@@ -29,6 +29,7 @@ services:
       MONGO_INITDB_DATABASE: "${DATABASE_NAME}"
     volumes:
       - mongostore:/data/db
+      - ./mongo_db:/docker-entrypoint-initdb.d
 
   # Web UI for mongo db
   mongo-express:

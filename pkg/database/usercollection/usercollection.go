@@ -13,7 +13,7 @@ type User struct {
 	UserName   string
 }
 
-const user = "user"
+const userCollection = "users"
 
 // Create new user
 func Create(userName string) (*User, error) {
@@ -22,7 +22,7 @@ func Create(userName string) (*User, error) {
 	}
 
 	db := database.Get()
-	inserted, err := db.Collection(user).InsertOne(database.GetContext(), newUser)
+	inserted, err := db.Collection(userCollection).InsertOne(database.GetContext(), newUser)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func getByID(id primitive.ObjectID) *User {
 	var result User
 
 	db := database.Get()
-	err := db.Collection(user).FindOne(database.GetContext(), filter).Decode(&result)
+	err := db.Collection(userCollection).FindOne(database.GetContext(), filter).Decode(&result)
 	if err != nil {
 		return nil
 	}
@@ -63,7 +63,7 @@ func GetByUserName(userName *string) *User {
 	var result User
 
 	db := database.Get()
-	err := db.Collection(user).FindOne(database.GetContext(), filter).Decode(&result)
+	err := db.Collection(userCollection).FindOne(database.GetContext(), filter).Decode(&result)
 	if err != nil {
 		return nil
 	}
