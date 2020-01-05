@@ -10,7 +10,7 @@ services:
 
     environment:
       API_KEY: "${API_KEY}"
-      DEBUG_MODE: "true"
+      DEBUG_MODE: "false"
       
     volumes:
       - ./:/go/masterchef-bot
@@ -21,7 +21,7 @@ services:
   # Mongo
   mongo:
     container_name: mongo
-    image: mongo:3.4
+    image: mongo:4.2
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: master

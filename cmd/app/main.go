@@ -58,8 +58,6 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 		// Check if the user is registered!
 		user := getUser(update)
 		registeredUser := usercollection.GetByUserName(user)
-		log.Print(registeredUser)
-		log.Print(registeredUser != nil)
 
 		if update.InlineQuery != nil {
 			// When user searches recipes with inline query
@@ -69,15 +67,11 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 				Results:       *results,
 			}
 			bot.AnswerInlineQuery(response)
-			// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			// msg.ReplyToMessageID = update.Message.MessageID
-			// bot.Send(msg)
 
 		} else if update.CallbackQuery != nil {
 			// When user interacts with inline buttons
-			replyText := callback.Handle(&update)
-			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, replyText)
-			bot.Send(msg)
+			replyText := callback.Handle(&update, registeredUser)
+			bot.Send(tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, replyText))
 
 		} else if update.Message.IsCommand() && update.Message != nil {
 			// When user enter a command
@@ -89,6 +83,7 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 	}
 }
 
+// Get username from the update
 func getUser(update tgbotapi.Update) (id *string) {
 
 	if update.Message != nil {

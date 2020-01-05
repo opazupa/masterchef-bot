@@ -9,8 +9,8 @@ import (
 
 // User document
 type User struct {
-	DatabaseID primitive.ObjectID `bson:"_id"`
-	UserName   string
+	ID       primitive.ObjectID `bson:"_id"`
+	UserName string             `bson:"UserName"`
 }
 
 const userCollection = "users"
