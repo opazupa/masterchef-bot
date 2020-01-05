@@ -29,6 +29,10 @@ func Handle(update *tgbotapi.Update, isRegistered bool) *[]interface{} {
 // Convert recipe results to InlineQueryResults
 func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]interface{} {
 
+	titleTemplate := `
+%s
+%s`
+
 	results := make([]interface{}, 0)
 	for i, recipe := range (*recipes)[:resultLimit] {
 		results = append(results, tgbotapi.InlineQueryResultArticle{
@@ -36,7 +40,7 @@ func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]inte
 			ID:    strconv.Itoa(i + 1),
 			Title: recipe.Title,
 			InputMessageContent: tgbotapi.InputTextMessageContent{
-				Text: recipe.URL,
+				Text: fmt.Sprintf(titleTemplate, recipe.Title, recipe.URL),
 			},
 			URL:         recipe.URL,
 			ThumbHeight: 8,

@@ -56,8 +56,8 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 	for update := range updates {
 
 		// Check if the user is registered!
-		userID := getUser(update)
-		registeredUser := usercollection.Get(userID)
+		user := getUser(update)
+		registeredUser := usercollection.GetByUserName(user)
 		log.Print(registeredUser)
 		log.Print(registeredUser != nil)
 
@@ -75,15 +75,9 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 
 		} else if update.CallbackQuery != nil {
 			// When user interacts with inline buttons
-			err := callback.Handle(&update)
-			if err != nil {
-				errMsg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Unknown callback 🧐")
-				bot.Send(errMsg)
-			} else {
-				msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Ok")
-				msg.ReplyToMessageID = update.CallbackQuery.Message.MessageID
-				bot.Send(msg)
-			}
+			replyText := callback.Handle(&update)
+			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, replyText)
+			bot.Send(msg)
 
 		} else if update.Message.IsCommand() && update.Message != nil {
 			// When user enter a command
@@ -95,16 +89,16 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 	}
 }
 
-func getUser(update tgbotapi.Update) (id *int) {
+func getUser(update tgbotapi.Update) (id *string) {
 
 	if update.Message != nil {
-		return &update.Message.From.ID
+		return &update.Message.From.UserName
 	} else if update.InlineQuery != nil {
-		return &update.InlineQuery.From.ID
+		return &update.InlineQuery.From.UserName
 	} else if update.CallbackQuery != nil {
-		return &update.CallbackQuery.From.ID
+		return &update.CallbackQuery.From.UserName
 	} else {
-		log.Print("Unable to find user id from update", update)
+		log.Print("Unable to find username from update", update)
 		return nil
 	}
 }

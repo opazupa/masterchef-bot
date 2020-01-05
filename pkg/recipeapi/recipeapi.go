@@ -61,7 +61,7 @@ func parseDuckDuckGoRecipes(html *goquery.Document) *[]Recipe {
 	html.Find(".links_main.links_deep.result__body").Each(func(i int, s *goquery.Selection) {
 		// For each item found, get the band and title
 		url, _ := s.Find("a.result__a").Attr("href")
-		title := s.Find("h2").Text()
+		title := strings.Split(s.Find("h2").Text(), " | ")[0]
 		desc := s.Find(".result__snippet").Text()
 
 		recipes = append(recipes, Recipe{

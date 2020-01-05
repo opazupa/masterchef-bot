@@ -10,39 +10,54 @@ import (
 // User document
 type User struct {
 	DatabaseID primitive.ObjectID `bson:"_id"`
-	ID         int
-	Name       string
+	UserName   string
 }
 
 const user = "user"
 
 // Create new user
-func Create(id int, name string) *User {
+func Create(userName string) (*User, error) {
 	newUser := bson.M{
-		"ID":   id,
-		"Name": name,
+		"UserName": userName,
 	}
 
+	db := database.Get()
+	inserted, err := db.Collection(user).InsertOne(database.GetContext(), newUser)
+	if err != nil {
+		return nil, err
+	}
+	return getByID(inserted.InsertedID.(primitive.ObjectID)), nil
+}
+
+// GetByID from collection
+func getByID(id primitive.ObjectID) *User {
+
+	filter := bson.D{
+		primitive.E{
+			Key: "_id", Value: id,
+		},
+	}
 	var result User
 
 	db := database.Get()
-	_, err := db.Collection(user).InsertOne(database.GetContext(), newUser)
+	err := db.Collection(user).FindOne(database.GetContext(), filter).Decode(&result)
 	if err != nil {
 		return nil
 	}
+
 	return &result
 }
 
-// Get user by id
-func Get(id *int) *User {
+// GetByUserName from collection
+func GetByUserName(userName *string) *User {
 
-	if id == nil {
+	if userName == nil {
 		return nil
 	}
 
 	filter := bson.D{
 		primitive.E{
-			Key: "ID", Value: *id,
+			Key: "UserName", Value: userName,
 		},
 	}
 	var result User
