@@ -10,8 +10,22 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-// Check mongo database
-func Check() {
+// MongoManager interface
+type MongoManager interface {
+	Get(collection string) *mongo.Collection
+	GetContext() *context.Context
+}
+
+type manager struct {
+	db  *mongo.Database
+	ctx *context.Context
+}
+
+// Manager for mongo db
+var Manager MongoManager
+
+func init() {
+
 	configuration := configuration.Get()
 	clientOptions := options.Client().ApplyURI(configuration.DatabaseConnection)
 	client, err := mongo.NewClient(clientOptions)
@@ -20,7 +34,7 @@ func Check() {
 		log.Panic(err)
 	}
 
-	ctx := GetContext()
+	ctx := context.Background()
 
 	// Check connections
 	err = client.Connect(ctx)
@@ -33,28 +47,13 @@ func Check() {
 	} else {
 		log.Printf("Connected to the [%s] database.", configuration.DatabaseName)
 	}
+	Manager = &manager{db: client.Database(configuration.DatabaseName), ctx: &ctx}
 }
 
-// Get mongo database
-func Get() *mongo.Database {
-	configuration := configuration.Get()
-	clientOptions := options.Client().ApplyURI(configuration.DatabaseConnection)
-	client, err := mongo.NewClient(clientOptions)
-
-	if err != nil {
-		log.Panic(err)
-	}
-
-	ctx := GetContext()
-	// Check connections
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return client.Database(configuration.DatabaseName)
+func (mgr *manager) Get(collectionName string) *mongo.Collection {
+	return mgr.db.Collection(collectionName)
 }
 
-// GetContext for database call
-func GetContext() context.Context {
-	return context.Background()
+func (mgr *manager) GetContext() *context.Context {
+	return mgr.ctx
 }

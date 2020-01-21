@@ -10,7 +10,6 @@ import (
 	"masterchef_bot/pkg/bot/command"
 	"masterchef_bot/pkg/bot/inlinequery"
 	"masterchef_bot/pkg/configuration"
-	"masterchef_bot/pkg/database"
 	"masterchef_bot/pkg/database/usercollection"
 )
 
@@ -18,7 +17,6 @@ import (
 func init() {
 	// loads values from .env into the system if present
 	godotenv.Load()
-	database.Check()
 }
 
 // Main application

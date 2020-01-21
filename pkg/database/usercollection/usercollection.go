@@ -9,20 +9,21 @@ import (
 
 // User document
 type User struct {
-	ID       primitive.ObjectID `bson:"_id"`
-	UserName string             `bson:"UserName"`
+	ID         primitive.ObjectID `bson:"_id"`
+	UserName   string             `bson:"UserName"`
+	TelegramID int                `bson:"TelegramID"`
 }
 
 const userCollection = "users"
 
 // Create new user
-func Create(userName string) (*User, error) {
+func Create(userName string, id int) (*User, error) {
 	newUser := bson.M{
-		"UserName": userName,
+		"UserName":   userName,
+		"TelegramId": id,
 	}
 
-	db := database.Get()
-	inserted, err := db.Collection(userCollection).InsertOne(database.GetContext(), newUser)
+	inserted, err := database.Manager.Get(userCollection).InsertOne(*database.Manager.GetContext(), newUser)
 	if err != nil {
 		return nil, err
 	}
@@ -39,8 +40,7 @@ func getByID(id primitive.ObjectID) *User {
 	}
 	var result User
 
-	db := database.Get()
-	err := db.Collection(userCollection).FindOne(database.GetContext(), filter).Decode(&result)
+	err := database.Manager.Get(userCollection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
 	if err != nil {
 		return nil
 	}
@@ -62,8 +62,7 @@ func GetByUserName(userName *string) *User {
 	}
 	var result User
 
-	db := database.Get()
-	err := db.Collection(userCollection).FindOne(database.GetContext(), filter).Decode(&result)
+	err := database.Manager.Get(userCollection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
 	if err != nil {
 		return nil
 	}

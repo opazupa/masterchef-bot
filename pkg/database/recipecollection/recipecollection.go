@@ -1,7 +1,6 @@
 package recipecollection
 
 import (
-	"fmt"
 	"masterchef_bot/pkg/database"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,10 +25,8 @@ func Add(name string, url string, userID primitive.ObjectID) (*Recipe, error) {
 		"UserID": userID,
 	}
 
-	db := database.Get()
-	inserted, err := db.Collection(recipeCollection).InsertOne(database.GetContext(), newRecipe)
+	inserted, err := database.Manager.Get(recipeCollection).InsertOne(*database.Manager.GetContext(), newRecipe)
 	if err != nil {
-		fmt.Print("moi")
 		return nil, err
 	}
 
@@ -47,9 +44,8 @@ func GetByUser(userID primitive.ObjectID) *[]Recipe {
 
 	results := []Recipe{}
 
-	db := database.Get()
-	ctx := database.GetContext()
-	cursor, err := db.Collection(recipeCollection).Find(ctx, filter)
+	ctx := *database.Manager.GetContext()
+	cursor, err := database.Manager.Get(recipeCollection).Find(ctx, filter)
 	if err != nil {
 		return &results
 	}
@@ -73,8 +69,7 @@ func getByID(id primitive.ObjectID) *Recipe {
 	}
 	var result Recipe
 
-	db := database.Get()
-	err := db.Collection(recipeCollection).FindOne(database.GetContext(), filter).Decode(&result)
+	err := database.Manager.Get(recipeCollection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
 	if err != nil {
 		return nil
 	}

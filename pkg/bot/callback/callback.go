@@ -48,7 +48,9 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string) {
 			return "Register first to start collecting recipes."
 		}
 
+		// NOT working TODO
 		// Save recipe to database
+		log.Print(update.CallbackQuery.Message)
 		recipeParts := strings.Split(update.CallbackQuery.Message.Text, "\n")
 		_, err := recipecollection.Add(recipeParts[0], recipeParts[1], user.ID)
 
@@ -64,9 +66,9 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string) {
 		}
 
 		// Register user for the bot
-		newUser, err := usercollection.Create(update.CallbackQuery.From.UserName)
+		newUser, err := usercollection.Create(update.CallbackQuery.From.UserName, update.CallbackQuery.From.ID)
 		if err == nil {
-			replyText = fmt.Sprintf("User [%s] registered", newUser.UserName)
+			replyText = fmt.Sprintf("User [%s] registered 🔥", newUser.UserName)
 		} else {
 			replyText = fmt.Sprintf("Failed to register user [%s]", update.CallbackQuery.From.UserName)
 		}
