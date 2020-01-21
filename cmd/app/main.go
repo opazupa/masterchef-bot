@@ -69,11 +69,16 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 		} else if update.CallbackQuery != nil {
 			// When user interacts with inline buttons
 			replyText := callback.Handle(&update, registeredUser)
-			bot.Send(tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, replyText))
+			response := tgbotapi.CallbackConfig{
+				CallbackQueryID: update.CallbackQuery.ID,
+				ShowAlert:       true,
+				Text:            replyText,
+			}
+			bot.AnswerCallbackQuery(response)
 
 		} else if update.Message.IsCommand() && update.Message != nil {
 			// When user enter a command
-			msg, err := command.Handle(&update, bot.Self.UserName)
+			msg, err := command.Handle(&update, bot.Self.UserName, registeredUser)
 			if err == nil {
 				bot.Send(msg)
 			}

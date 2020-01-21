@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"masterchef_bot/pkg/bot/callback"
+	"masterchef_bot/pkg/database/usercollection"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -57,7 +58,7 @@ to store your name and telegram id.
 }
 
 // Handle command for bot
-func Handle(update *tgbotapi.Update, botName string) (msg *tgbotapi.MessageConfig, err error) {
+func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) (msg *tgbotapi.MessageConfig, err error) {
 
 	var reply tgbotapi.MessageConfig
 
@@ -66,9 +67,10 @@ func Handle(update *tgbotapi.Update, botName string) (msg *tgbotapi.MessageConfi
 		reply = tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf(commands.Help.Description, botName))
 	case strings.ToLower(commands.Start.Key):
 		reply = tgbotapi.NewMessage(update.Message.Chat.ID, commands.Start.Description)
+
 		// Give option to register to new users
-		if true {
-			reply.ReplyMarkup = addActionButtons(update.Message.From.ID)
+		if user == nil {
+			reply.ReplyMarkup = addActionButtons()
 		}
 	default:
 		return nil, fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
@@ -76,7 +78,7 @@ func Handle(update *tgbotapi.Update, botName string) (msg *tgbotapi.MessageConfi
 	return &reply, nil
 }
 
-func addActionButtons(user int) *tgbotapi.InlineKeyboardMarkup {
+func addActionButtons() *tgbotapi.InlineKeyboardMarkup {
 
 	registerAction := callback.RegisteredActions.RegisterAction
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(

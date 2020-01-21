@@ -30,7 +30,7 @@ func Add(name string, url string, userID primitive.ObjectID) (*Recipe, error) {
 		return nil, err
 	}
 
-	return getByID(inserted.InsertedID.(primitive.ObjectID)), nil
+	return GetByID(inserted.InsertedID.(primitive.ObjectID)), nil
 }
 
 // GetByUser from collection
@@ -60,7 +60,7 @@ func GetByUser(userID primitive.ObjectID) *[]Recipe {
 }
 
 // GetByID from collection
-func getByID(id primitive.ObjectID) *Recipe {
+func GetByID(id primitive.ObjectID) *Recipe {
 
 	filter := bson.D{
 		primitive.E{

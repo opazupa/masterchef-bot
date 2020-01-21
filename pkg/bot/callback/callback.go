@@ -30,7 +30,7 @@ var RegisteredActions = &Actions{
 		ID:   "1",
 		Text: "Save 👊",
 	},
-	// RegisterAction for registr user button
+	// RegisterAction for register user button
 	RegisterAction: callbackAction{
 		ID:   "2",
 		Text: "Hop on 👌",

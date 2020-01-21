@@ -2,7 +2,6 @@ package inlinequery
 
 import (
 	"fmt"
-	"log"
 	"masterchef_bot/pkg/bot/callback"
 	"masterchef_bot/pkg/recipeapi"
 	"strconv"
@@ -17,7 +16,6 @@ const (
 // Handle inline query for the bot
 func Handle(update *tgbotapi.Update, isRegistered bool) *[]interface{} {
 
-	log.Printf("[%s] Inline query: (%s)", update.InlineQuery.From.UserName, update.InlineQuery.Query)
 	if update.InlineQuery.Query == "" {
 		// Return maybe some trending results here
 		return &[]interface{}{}
@@ -48,14 +46,14 @@ func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]inte
 			ThumbURL:    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcCPYO-yVEALy1NE2deQtHC2uOy091lUvRPyFWEUyE0xlgsNm8&s",
 			HideURL:     true,
 			Description: recipe.Description,
-			ReplyMarkup: addActionButtons(isRegistered, recipe),
+			ReplyMarkup: addActionButtons(isRegistered),
 		})
 	}
 
 	return &results
 }
 
-func addActionButtons(isRegistered bool, recipe recipeapi.Recipe) *tgbotapi.InlineKeyboardMarkup {
+func addActionButtons(isRegistered bool) *tgbotapi.InlineKeyboardMarkup {
 
 	// Hide buttons if user is not registered
 	if !isRegistered {
