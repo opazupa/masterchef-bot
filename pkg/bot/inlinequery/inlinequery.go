@@ -5,29 +5,59 @@ import (
 	"masterchef_bot/pkg/bot/callback"
 	"masterchef_bot/pkg/recipeapi"
 	"strconv"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 const (
-	resultLimit = 10
+	prefixPosition = 0,
+	namePosition = 1,
+	urlPosition = 2,
+	resultLimit        = 10
+	recipeResultPrefix = "🍕🍕 Here you go:"
 )
 
 // Handle inline query for the bot
 func Handle(update *tgbotapi.Update, isRegistered bool) *[]interface{} {
 
+	// Ignore empty queries
 	if update.InlineQuery.Query == "" {
-		// Return maybe some trending results here
 		return &[]interface{}{}
 	}
 	results := recipeapi.SearchRecipes(update.InlineQuery.Query)
 	return toInlineQueryResult(results, isRegistered)
 }
 
+// IsRecipe an selected inlinequery recipe
+func IsRecipe(update *tgbotapi.Update) bool {
+
+	// Inlinequery result has a specific prefix on message
+	if update.Message != nil {
+		recipeResultParts := strings.Split(update.Message.Text, "\n")
+		if recipeResultParts[0] == recipeResultPrefix {
+			return true
+		}
+	}
+	return false
+}
+
+// IsRecipe an selected inlinequery recipe
+func GetRecipeInfo(update *tgbotapi.Update) (name *string, url *string) {
+
+	// Inlinequery result has a specific prefix on message
+	if update.Message != nil {
+		recipeResultParts := strings.Split(update.Message.Text, "\n")
+		return recipeResultParts[1], recipeResultParts[]
+	}
+	return nil, nil
+}
+
 // Convert recipe results to InlineQueryResults
 func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]interface{} {
 
 	titleTemplate := `
+%s
 %s
 %s`
 
@@ -38,7 +68,7 @@ func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]inte
 			ID:    strconv.Itoa(i + 1),
 			Title: recipe.Title,
 			InputMessageContent: tgbotapi.InputTextMessageContent{
-				Text: fmt.Sprintf(titleTemplate, recipe.Title, recipe.URL),
+				Text: fmt.Sprintf(titleTemplate, recipeResultPrefix, recipe.Title, recipe.URL),
 			},
 			URL:         recipe.URL,
 			ThumbHeight: 8,

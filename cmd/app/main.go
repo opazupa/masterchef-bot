@@ -53,6 +53,7 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 
 	for update := range updates {
 
+		log.Println(inlinequery.IsRecipe(&update))
 		// Check if the user is registered!
 		user := getUser(update)
 		registeredUser := usercollection.GetByUserName(user)
@@ -66,12 +67,14 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 			}
 			bot.AnswerInlineQuery(response)
 
+		} else if inlinequery.IsRecipe(&update) {
+			// When user selects a recipe from inline query
+
 		} else if update.CallbackQuery != nil {
 			// When user interacts with inline buttons
 			replyText := callback.Handle(&update, registeredUser)
 			response := tgbotapi.CallbackConfig{
 				CallbackQueryID: update.CallbackQuery.ID,
-				ShowAlert:       true,
 				Text:            replyText,
 			}
 			bot.AnswerCallbackQuery(response)
