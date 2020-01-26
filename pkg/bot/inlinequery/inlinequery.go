@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	prefixPosition = 0,
-	namePosition = 1,
-	urlPosition = 2,
+	prefixPosition     = 0
+	namePosition       = 1
+	urlPosition        = 2
 	resultLimit        = 10
 	recipeResultPrefix = "🍕🍕 Here you go:"
 )
@@ -35,22 +35,17 @@ func IsRecipe(update *tgbotapi.Update) bool {
 	// Inlinequery result has a specific prefix on message
 	if update.Message != nil {
 		recipeResultParts := strings.Split(update.Message.Text, "\n")
-		if recipeResultParts[0] == recipeResultPrefix {
+		if recipeResultParts[prefixPosition] == recipeResultPrefix {
 			return true
 		}
 	}
 	return false
 }
 
-// IsRecipe an selected inlinequery recipe
-func GetRecipeInfo(update *tgbotapi.Update) (name *string, url *string) {
-
-	// Inlinequery result has a specific prefix on message
-	if update.Message != nil {
-		recipeResultParts := strings.Split(update.Message.Text, "\n")
-		return recipeResultParts[1], recipeResultParts[]
-	}
-	return nil, nil
+// GetRecipeInfo for an selected inlinequery recipe
+func GetRecipeInfo(update *tgbotapi.Update) (name string, url string) {
+	recipeResultParts := strings.Split(update.Message.Text, "\n")
+	return recipeResultParts[namePosition], recipeResultParts[urlPosition]
 }
 
 // Convert recipe results to InlineQueryResults

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"masterchef_bot/pkg/database/recipecollection"
+	selection "masterchef_bot/pkg/database/selectedrecipecollection"
 	"masterchef_bot/pkg/database/usercollection"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -46,17 +48,21 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string) {
 			return "Register first to start collecting recipes."
 		}
 
-		// NOT working TODO
-		// Save recipe to database
-		// log.Print(update.CallbackQuery.Message)
-		// recipeParts := strings.Split(update.CallbackQuery.Message.Text, "\n")
-		// _, err := recipecollection.Add(recipeParts[0], recipeParts[1], user.ID)
+		// Get user's selection from database
+		// TODO Olli
+		selectedRecipe := selection.GetByUser(update.CallbackQuery, user.ID)
+		if selectedRecipe == nil {
+			return "Something went wrong when fetching the selected recipe 🧐"
+		}
 
-		// if err == nil {
-		// 	replyText = fmt.Sprintf("Recipe saved 😛")
-		// } else {
-		// 	replyText = fmt.Sprintf("Failed to save the recipe ☹")
-		// }
+		// Save recipe to database
+		_, err := recipecollection.Add(selectedRecipe.Name, selectedRecipe.URL, user.ID)
+
+		if err == nil {
+			replyText = fmt.Sprintf("Recipe saved 😛")
+		} else {
+			replyText = fmt.Sprintf("Failed to save the recipe ☹")
+		}
 
 	case RegisteredActions.RegisterAction.ID:
 		if user != nil {

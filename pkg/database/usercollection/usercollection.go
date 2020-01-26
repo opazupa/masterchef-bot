@@ -14,7 +14,7 @@ type User struct {
 	TelegramID int                `bson:"TelegramID"`
 }
 
-const userCollection = "users"
+const collection = "users"
 
 // Create new user
 func Create(userName string, id int) (*User, error) {
@@ -23,7 +23,7 @@ func Create(userName string, id int) (*User, error) {
 		"TelegramId": id,
 	}
 
-	inserted, err := database.Manager.Get(userCollection).InsertOne(*database.Manager.GetContext(), newUser)
+	inserted, err := database.Manager.Get(collection).InsertOne(*database.Manager.GetContext(), newUser)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func getByID(id primitive.ObjectID) *User {
 	}
 	var result User
 
-	err := database.Manager.Get(userCollection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
+	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
 	if err != nil {
 		return nil
 	}
@@ -62,7 +62,7 @@ func GetByUserName(userName *string) *User {
 	}
 	var result User
 
-	err := database.Manager.Get(userCollection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
+	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
 	if err != nil {
 		return nil
 	}

@@ -10,6 +10,7 @@ import (
 	"masterchef_bot/pkg/bot/command"
 	"masterchef_bot/pkg/bot/inlinequery"
 	"masterchef_bot/pkg/configuration"
+	selection "masterchef_bot/pkg/database/selectedrecipecollection"
 	"masterchef_bot/pkg/database/usercollection"
 )
 
@@ -67,8 +68,10 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 			}
 			bot.AnswerInlineQuery(response)
 
-		} else if inlinequery.IsRecipe(&update) {
-			// When user selects a recipe from inline query
+		} else if inlinequery.IsRecipe(&update) && registeredUser != nil {
+			// When registered user selects a recipe from inline query
+			recipeName, recipeURL := inlinequery.GetRecipeInfo(&update)
+			selection.Save(recipeName, recipeURL, update.Message.Chat.ID, registeredUser.ID)
 
 		} else if update.CallbackQuery != nil {
 			// When user interacts with inline buttons

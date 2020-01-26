@@ -15,7 +15,7 @@ type Recipe struct {
 	URL    string             `bson:"URL"`
 }
 
-const recipeCollection = "recipes"
+const collection = "recipes"
 
 // Add new recipe
 func Add(name string, url string, userID primitive.ObjectID) (*Recipe, error) {
@@ -25,7 +25,7 @@ func Add(name string, url string, userID primitive.ObjectID) (*Recipe, error) {
 		"UserID": userID,
 	}
 
-	inserted, err := database.Manager.Get(recipeCollection).InsertOne(*database.Manager.GetContext(), newRecipe)
+	inserted, err := database.Manager.Get(collection).InsertOne(*database.Manager.GetContext(), newRecipe)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func GetByUser(userID primitive.ObjectID) *[]Recipe {
 	results := []Recipe{}
 
 	ctx := *database.Manager.GetContext()
-	cursor, err := database.Manager.Get(recipeCollection).Find(ctx, filter)
+	cursor, err := database.Manager.Get(collection).Find(ctx, filter)
 	if err != nil {
 		return &results
 	}
@@ -69,7 +69,7 @@ func GetByID(id primitive.ObjectID) *Recipe {
 	}
 	var result Recipe
 
-	err := database.Manager.Get(recipeCollection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
+	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
 	if err != nil {
 		return nil
 	}
