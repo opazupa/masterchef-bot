@@ -1,6 +1,7 @@
 package recipecollection
 
 import (
+	"log"
 	"masterchef_bot/pkg/database"
 	"time"
 
@@ -30,6 +31,7 @@ func Add(name string, url string, userID primitive.ObjectID) (*Recipe, error) {
 
 	inserted, err := database.Manager.Get(collection).InsertOne(*database.Manager.GetContext(), newRecipe)
 	if err != nil {
+		log.Print(err)
 		return nil, err
 	}
 
@@ -50,6 +52,7 @@ func GetByUser(userID primitive.ObjectID) *[]Recipe {
 	ctx := *database.Manager.GetContext()
 	cursor, err := database.Manager.Get(collection).Find(ctx, filter)
 	if err != nil {
+		log.Print(err)
 		return &results
 	}
 	// Iterate through the returned cursor.
@@ -74,6 +77,7 @@ func GetByID(id primitive.ObjectID) *Recipe {
 
 	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
 	if err != nil {
+		log.Print(err)
 		return nil
 	}
 

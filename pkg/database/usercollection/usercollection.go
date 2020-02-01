@@ -1,6 +1,7 @@
 package usercollection
 
 import (
+	"log"
 	"masterchef_bot/pkg/database"
 	"time"
 
@@ -67,6 +68,7 @@ func GetByUserName(userName *string) *User {
 
 	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
 	if err != nil {
+		log.Print(err)
 		return nil
 	}
 

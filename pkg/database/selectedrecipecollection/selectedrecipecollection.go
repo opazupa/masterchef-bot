@@ -1,6 +1,7 @@
 package selectedrecipecollection
 
 import (
+	"log"
 	"masterchef_bot/pkg/database"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -39,7 +40,9 @@ func Save(name string, url string, chatID int64, userID primitive.ObjectID) erro
 	}
 	// Try to update if the exsiting user and chat is found
 	res := database.Manager.Get(collection).FindOneAndUpdate(*database.Manager.GetContext(), userFilter, update, &opt)
-
+	if res.Err() != nil {
+		log.Print(res.Err())
+	}
 	return res.Err()
 }
 
@@ -54,6 +57,7 @@ func GetByUser(userID primitive.ObjectID) *SelectedRecipe {
 
 	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
 	if err != nil {
+		log.Print(err)
 		return nil
 	}
 
