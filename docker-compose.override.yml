@@ -9,9 +9,8 @@ services:
       context: .
       dockerfile: ./Dev.Dockerfile
 
-    environment:
-      API_KEY: "${API_KEY}"
-      DEBUG_MODE: "false"
+    env_file:
+      - ./.env
       
     volumes:
       - ./:/go/masterchef-bot

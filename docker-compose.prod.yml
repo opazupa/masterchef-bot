@@ -10,4 +10,7 @@ services:
 
     environment:
       API_KEY: "${API_KEY}"
-      DEBUG_MODE: "false"
+      DEBUG_MODE: "${DEBUG_MODE}"
+      DATABASE_NAME: "${DATABASE_NAME}"
+      DATABASE_CONNECTION: "${DATABASE_CONNECTION}"
+
