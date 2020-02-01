@@ -54,7 +54,6 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 
 	for update := range updates {
 
-		log.Println(inlinequery.IsRecipe(&update))
 		// Check if the user is registered!
 		user := getUser(update)
 		registeredUser := usercollection.GetByUserName(user)
