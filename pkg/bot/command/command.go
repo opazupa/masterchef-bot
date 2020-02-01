@@ -27,32 +27,31 @@ var commands = &list{
 	Help: command{
 		Key: "Help",
 		Description: `
-How can I help you Sir?
+How can I help you *Sir?*
 
+*Start* with /start command.
 
-Start with /start command.
-
-Recipe search
+*Recipe search*
 Search for recipes by calling
-@%s and then by typing recipe.
+''@%s'' and then by typing recipe.
 
-Services
-- list of service coming up here
 `,
 	},
 	Start: command{
 		Key: "Start",
 		Description: `
-Hi!
+*Hi*!
 
-I’m the Masterchef bot on your service!👌
-Let’s start cooking ay? 🔥
+I’m the *Masterchef* bot on your service!👌
 
-By registering you can start building
+Register and start building
 your own masterchef recipe book. 👇
+*Let’s start cooking ay?* 🔥
 
-By doing that you accept @Mc_Recipe_Bot
+''''''
+By doing that you accept @%s
 to store your name and telegram id.
+''''''
 `,
 	},
 }
@@ -64,9 +63,9 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 
 	switch update.Message.Command() {
 	case strings.ToLower(commands.Help.Key):
-		reply = tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf(commands.Help.Description, botName))
+		reply = tgbotapi.NewMessage(update.Message.Chat.ID, strings.ReplaceAll(fmt.Sprintf(commands.Help.Description, botName), "''", "`"))
 	case strings.ToLower(commands.Start.Key):
-		reply = tgbotapi.NewMessage(update.Message.Chat.ID, commands.Start.Description)
+		reply = tgbotapi.NewMessage(update.Message.Chat.ID, strings.ReplaceAll(fmt.Sprintf(commands.Start.Description, botName), "''", "`"))
 
 		// Give option to register to new users
 		if user == nil {
@@ -75,6 +74,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 	default:
 		return nil, fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
 	}
+	reply.ParseMode = "Markdown"
 	return &reply, nil
 }
 

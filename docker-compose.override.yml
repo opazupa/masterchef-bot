@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
 
+  # Telegram bot
   masterchef-bot:
     restart: always
     build:
