@@ -38,20 +38,20 @@ var RegisteredActions = &Actions{
 }
 
 // Handle callbackquery updates and next action
-func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string, nextActions *tgbotapi.InlineKeyboardMarkup) {
+func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string, nextAction *tgbotapi.EditMessageReplyMarkupConfig) {
 
 	var replyText string
 
 	switch update.CallbackQuery.Data {
 	case RegisteredActions.SaveAction.ID:
 		if user == nil {
-			return "Register first to start collecting recipes.", nil
+			return "Register first to start collecting recipes.", createAction(update.CallbackQuery, nil)
 		}
 
 		// Get user's selection from database
 		selectedRecipe := selection.GetByUser(user.ID)
 		if selectedRecipe == nil {
-			return "Something went wrong when fetching the selected recipe 🧐", nil
+			return "Something went wrong when fetching the selected recipe 🧐", createAction(update.CallbackQuery, nil)
 		}
 
 		// Save recipe to database
@@ -65,7 +65,7 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string, nex
 
 	case RegisteredActions.RegisterAction.ID:
 		if user != nil {
-			return "You're already registered.", nil
+			return "You're already registered.", createAction(update.CallbackQuery, nil)
 		}
 
 		// Register user for the bot
@@ -81,5 +81,22 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string, nex
 		replyText = "Unknown callback 🧐"
 	}
 
-	return replyText, nil
+	return replyText, createAction(update.CallbackQuery, nil)
+}
+
+// Create nee action keyboard by modifying the existing message
+func createAction(callback *tgbotapi.CallbackQuery, markup *tgbotapi.InlineKeyboardMarkup) *tgbotapi.EditMessageReplyMarkupConfig {
+	nextAction := tgbotapi.EditMessageReplyMarkupConfig{
+		BaseEdit: tgbotapi.BaseEdit{
+			ReplyMarkup: markup,
+		},
+	}
+	if callback.InlineMessageID != "" {
+		nextAction.InlineMessageID = callback.InlineMessageID
+	}
+	if callback.Message != nil {
+		nextAction.ChatID = callback.Message.Chat.ID
+		nextAction.MessageID = callback.Message.MessageID
+	}
+	return &nextAction
 }

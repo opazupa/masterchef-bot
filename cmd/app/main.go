@@ -82,12 +82,9 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 			}
 
 			// Hide action buttons from the inline query
-			bot.Send(tgbotapi.EditMessageReplyMarkupConfig{
-				BaseEdit: tgbotapi.BaseEdit{
-					InlineMessageID: update.CallbackQuery.InlineMessageID,
-					ReplyMarkup:     nextAction,
-				},
-			})
+			if nextAction != nil {
+				bot.Send(nextAction)
+			}
 			bot.AnswerCallbackQuery(response)
 
 		} else if update.Message != nil && update.Message.IsCommand() {
