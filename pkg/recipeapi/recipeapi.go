@@ -77,7 +77,7 @@ func parseDuckDuckGoRecipes(html *goquery.Document) *[]Recipe {
 func parseURL(encodedURL string) string {
 	decodedURL, _ := url.QueryUnescape(encodedURL)
 	// Remove link prefix
-	return decodedURL[linkPrefix : len(decodedURL)-1]
+	return decodedURL[linkPrefix:len(decodedURL)]
 }
 
 // Parse whitespaces

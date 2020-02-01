@@ -3,6 +3,7 @@ package selectedrecipecollection
 import (
 	"log"
 	"masterchef_bot/pkg/database"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,11 +12,12 @@ import (
 
 // SelectedRecipe document
 type SelectedRecipe struct {
-	ID     primitive.ObjectID `bson:"_id"`
-	UserID primitive.ObjectID `bson:"UserID"`
-	ChatID int64              `bson:"ChatID"`
-	Name   string             `bson:"Name"`
-	URL    string             `bson:"URL"`
+	ID       primitive.ObjectID `bson:"_id"`
+	UserID   primitive.ObjectID `bson:"UserID"`
+	ChatID   int64              `bson:"ChatID"`
+	Name     string             `bson:"Name"`
+	URL      string             `bson:"URL"`
+	Selected time.Time          `bson:"Selected"`
 }
 
 const collection = "selectedrecipes"
@@ -29,8 +31,9 @@ func Save(name string, url string, chatID int64, userID primitive.ObjectID) erro
 	}
 	update := bson.M{
 		"$set": bson.M{
-			"Name": name,
-			"URL":  url,
+			"Name":     name,
+			"URL":      url,
+			"Selected": time.Now(),
 		},
 	}
 
@@ -55,7 +58,15 @@ func GetByUser(userID primitive.ObjectID) *SelectedRecipe {
 
 	var result SelectedRecipe
 
-	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
+	opt := options.FindOne()
+	// Sort by `Selected` field descending
+	opt.SetSort(bson.D{
+		bson.E{
+			Key: "Selected", Value: -1,
+		},
+	})
+
+	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter, opt).Decode(&result)
 	if err != nil {
 		log.Print(err)
 		return nil
