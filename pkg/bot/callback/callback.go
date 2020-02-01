@@ -37,22 +37,21 @@ var RegisteredActions = &Actions{
 	},
 }
 
-// Handle callbackquery updates
-func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string) {
+// Handle callbackquery updates and next action
+func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string, nextActions *tgbotapi.InlineKeyboardMarkup) {
 
 	var replyText string
 
 	switch update.CallbackQuery.Data {
 	case RegisteredActions.SaveAction.ID:
 		if user == nil {
-			return "Register first to start collecting recipes."
+			return "Register first to start collecting recipes.", nil
 		}
 
 		// Get user's selection from database
-		// TODO Olli
-		selectedRecipe := selection.GetByUser(update.CallbackQuery, user.ID)
+		selectedRecipe := selection.GetByUser(user.ID)
 		if selectedRecipe == nil {
-			return "Something went wrong when fetching the selected recipe 🧐"
+			return "Something went wrong when fetching the selected recipe 🧐", nil
 		}
 
 		// Save recipe to database
@@ -66,7 +65,7 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string) {
 
 	case RegisteredActions.RegisterAction.ID:
 		if user != nil {
-			return "You're already registered."
+			return "You're already registered.", nil
 		}
 
 		// Register user for the bot
@@ -82,5 +81,5 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string) {
 		replyText = "Unknown callback 🧐"
 	}
 
-	return replyText
+	return replyText, nil
 }

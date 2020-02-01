@@ -75,14 +75,22 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 
 		} else if update.CallbackQuery != nil {
 			// When user interacts with inline buttons
-			replyText := callback.Handle(&update, registeredUser)
+			replyText, nextAction := callback.Handle(&update, registeredUser)
 			response := tgbotapi.CallbackConfig{
 				CallbackQueryID: update.CallbackQuery.ID,
 				Text:            replyText,
 			}
+
+			// Hide action buttons from the inline query
+			bot.Send(tgbotapi.EditMessageReplyMarkupConfig{
+				BaseEdit: tgbotapi.BaseEdit{
+					InlineMessageID: update.CallbackQuery.InlineMessageID,
+					ReplyMarkup:     nextAction,
+				},
+			})
 			bot.AnswerCallbackQuery(response)
 
-		} else if update.Message.IsCommand() && update.Message != nil {
+		} else if update.Message != nil && update.Message.IsCommand() {
 			// When user enter a command
 			msg, err := command.Handle(&update, bot.Self.UserName, registeredUser)
 			if err == nil {
@@ -101,6 +109,8 @@ func getUser(update tgbotapi.Update) (id *string) {
 		return &update.InlineQuery.From.UserName
 	} else if update.CallbackQuery != nil {
 		return &update.CallbackQuery.From.UserName
+	} else if update.EditedMessage != nil {
+		return &update.EditedMessage.From.UserName
 	} else {
 		log.Print("Unable to find username from update", update)
 		return nil

@@ -68,7 +68,7 @@ func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]inte
 			URL:         recipe.URL,
 			ThumbHeight: 8,
 			ThumbWidth:  8,
-			ThumbURL:    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcCPYO-yVEALy1NE2deQtHC2uOy091lUvRPyFWEUyE0xlgsNm8&s",
+			ThumbURL:    "https://cmkt-image-prd.freetls.fastly.net/0.1.0/ps/7519111/600/400/m2/fpnw/wm0/chef-hat-illustration-for-cooking-logo-with-love-element-.jpg?1577620994&s=54f7c96e07ef7b7479f9606910bc167c",
 			HideURL:     true,
 			Description: recipe.Description,
 			ReplyMarkup: addActionButtons(isRegistered),

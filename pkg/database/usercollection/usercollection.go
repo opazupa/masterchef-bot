@@ -2,6 +2,7 @@ package usercollection
 
 import (
 	"masterchef_bot/pkg/database"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -12,6 +13,7 @@ type User struct {
 	ID         primitive.ObjectID `bson:"_id"`
 	UserName   string             `bson:"UserName"`
 	TelegramID int                `bson:"TelegramID"`
+	Registered time.Time          `bson:"Registered"`
 }
 
 const collection = "users"
@@ -21,6 +23,7 @@ func Create(userName string, id int) (*User, error) {
 	newUser := bson.M{
 		"UserName":   userName,
 		"TelegramId": id,
+		"Registered": time.Now(),
 	}
 
 	inserted, err := database.Manager.Get(collection).InsertOne(*database.Manager.GetContext(), newUser)

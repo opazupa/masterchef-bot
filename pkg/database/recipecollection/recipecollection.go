@@ -2,6 +2,7 @@ package recipecollection
 
 import (
 	"masterchef_bot/pkg/database"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,6 +14,7 @@ type Recipe struct {
 	UserID primitive.ObjectID `bson:"UserID"`
 	Name   string             `bson:"Name"`
 	URL    string             `bson:"URL"`
+	Added  time.Time          `bson:"Added"`
 }
 
 const collection = "recipes"
@@ -23,6 +25,7 @@ func Add(name string, url string, userID primitive.ObjectID) (*Recipe, error) {
 		"Name":   name,
 		"URL":    url,
 		"UserID": userID,
+		"Added":  time.Now(),
 	}
 
 	inserted, err := database.Manager.Get(collection).InsertOne(*database.Manager.GetContext(), newRecipe)

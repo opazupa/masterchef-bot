@@ -5,6 +5,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // SelectedRecipe document
@@ -20,22 +21,32 @@ const collection = "selectedrecipes"
 
 // Save new selection for user in a given chat
 func Save(name string, url string, chatID int64, userID primitive.ObjectID) error {
-	newUserSelection := bson.M{
-		"Name":   name,
-		"URL":    url,
+
+	userFilter := bson.M{
 		"ChatID": chatID,
 		"UserID": userID,
 	}
+	update := bson.M{
+		"$set": bson.M{
+			"Name": name,
+			"URL":  url,
+		},
+	}
 
-	_, err := database.Manager.Get(collection).InsertOne(*database.Manager.GetContext(), newUserSelection)
-	return err
+	upsert := true
+	opt := options.FindOneAndUpdateOptions{
+		Upsert: &upsert,
+	}
+	// Try to update if the exsiting user and chat is found
+	res := database.Manager.Get(collection).FindOneAndUpdate(*database.Manager.GetContext(), userFilter, update, &opt)
+
+	return res.Err()
 }
 
-// GetByUser for given chat
-func GetByUser(chatID int64, userID primitive.ObjectID) *SelectedRecipe {
+// GetByUser from the collection
+func GetByUser(userID primitive.ObjectID) *SelectedRecipe {
 
 	filter := bson.M{
-		"ChatID": chatID,
 		"UserID": userID,
 	}
 
