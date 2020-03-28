@@ -87,7 +87,7 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 			bot.AnswerCallbackQuery(response)
 
 		} else if update.Message != nil && update.Message.IsCommand() {
-			// When user enter a command
+			// When user enters a command
 			msg, err := command.Handle(&update, bot.Self.UserName, registeredUser)
 			if err == nil {
 				bot.Send(msg)

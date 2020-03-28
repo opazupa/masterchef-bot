@@ -7,6 +7,7 @@ I'm a **`MasterChefBot`** and ready to help you in the kitchen!
 ## Get it cooking :pizza:
 - Search recipes
 - Sign up and collect recipes
+- Get random recipe
 
 
 
@@ -16,8 +17,8 @@ I'm a **`MasterChefBot`** and ready to help you in the kitchen!
 
 Configuration
 ```
-    API_KEY:            "<your-bot-api-key>"
-    DEBUG_MODE:         true/false
+API_KEY:                 "<your-bot-api-key>"
+    DEBUG_MODE:          true/false
     DATABASE_CONNECTION: "mongo_connection"
 	DATABASE_NAME:       "your_db"  
 ```

@@ -18,18 +18,21 @@ type command struct {
 
 // List of Commands
 type list struct {
-	Help  command
-	Start command
+	Help   command
+	Random command
+	Start  command
 }
 
 // Configured commands
 var commands = &list{
 	Help: command{
-		Key: "Help",
+		Key: "help",
 		Description: `
 How can I help you *Sir?*
 
 *Start* with /start command.
+
+*Random recipe* with /random command.
 
 *Recipe search*
 Search for recipes by calling
@@ -37,8 +40,12 @@ Search for recipes by calling
 
 `,
 	},
+	Random: command{
+		Key:         "random",
+		Description: ``,
+	},
 	Start: command{
-		Key: "Start",
+		Key: "start",
 		Description: `
 *Hi*!
 
@@ -62,9 +69,15 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 	var reply tgbotapi.MessageConfig
 
 	switch update.Message.Command() {
-	case strings.ToLower(commands.Help.Key):
+
+	case commands.Help.Key:
 		reply = tgbotapi.NewMessage(update.Message.Chat.ID, strings.ReplaceAll(fmt.Sprintf(commands.Help.Description, botName), "''", "`"))
-	case strings.ToLower(commands.Start.Key):
+
+	case commands.Random.Key:
+		// TODO Olli
+		// Get random recipe here and return the msg
+
+	case commands.Start.Key:
 		reply = tgbotapi.NewMessage(update.Message.Chat.ID, strings.ReplaceAll(fmt.Sprintf(commands.Start.Description, botName), "''", "`"))
 
 		// Give option to register to new users
