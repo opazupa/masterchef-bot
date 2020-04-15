@@ -72,19 +72,20 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 	switch update.Message.Command() {
 
 	case commands.Help.Key:
-		reply = tgbotapi.NewMessage(update.Message.Chat.ID, strings.ReplaceAll(fmt.Sprintf(commands.Help.Description, botName), "''", "`"))
+		reply = tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Help.Description, botName))
 
 	case commands.Random.Key:
 		// Get a random recipe
 		if recipes := *recipecollection.GetRandom(1); len(recipes) > 0 {
 			reply = tgbotapi.NewMessage(update.Message.Chat.ID, recipes[0].ToMessage(commands.Random.Description))
 		}
+		return nil, fmt.Errorf("No recipes returned for the random one")
 	case commands.Start.Key:
-		reply = tgbotapi.NewMessage(update.Message.Chat.ID, strings.ReplaceAll(fmt.Sprintf(commands.Start.Description, botName), "''", "`"))
+		reply = tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Start.Description, botName))
 
 		// Give option to register to new users
 		if user == nil {
-			reply.ReplyMarkup = callback.RegisteredActions.RegisterAction.AddButton()
+			reply.ReplyMarkup = callback.RegisteredActions.RegisterAction.CreateButton()
 		}
 	default:
 		return nil, fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
@@ -93,14 +94,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 	return &reply, nil
 }
 
-// Adds button for user registration
-func addRegisterButton() *tgbotapi.InlineKeyboardMarkup {
-
-	registerAction := callback.RegisteredActions.RegisterAction
-	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(registerAction.Text, registerAction.ID),
-		),
-	)
-	return &keyboard
+// Finalize markdown with correct chars
+func finalizedMarkdown(markdown string, params ...interface{}) string {
+	return strings.ReplaceAll(fmt.Sprintf(markdown, params...), "''", "`")
 }

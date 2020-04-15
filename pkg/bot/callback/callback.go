@@ -45,7 +45,8 @@ const (
 	otherIDsPosotion        = 1
 )
 
-func (action callbackAction) AddButton(otherIds ...string) *tgbotapi.InlineKeyboardMarkup {
+// CreateButton for inlinekeyboard
+func (action callbackAction) CreateButton(otherIds ...string) *tgbotapi.InlineKeyboardMarkup {
 
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -64,13 +65,13 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string, nex
 	switch action {
 	case RegisteredActions.SaveAction.ID:
 		if user == nil {
-			return "Register first to start collecting recipes.", createAction(update.CallbackQuery, nil)
+			return "Register first to start collecting recipes.", createNextAction(update.CallbackQuery, nil)
 		}
 
 		// Get user's selection from database
 		selectedRecipe := selection.GetByUser(user.ID)
 		if selectedRecipe == nil {
-			return "Something went wrong when fetching the selected recipe 🧐", createAction(update.CallbackQuery, nil)
+			return "Something went wrong when fetching the selected recipe 🧐", createNextAction(update.CallbackQuery, nil)
 		}
 
 		// Save recipe to database
@@ -84,7 +85,7 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string, nex
 
 	case RegisteredActions.RegisterAction.ID:
 		if user != nil {
-			return "You're already registered.", createAction(update.CallbackQuery, nil)
+			return "You're already registered.", createNextAction(update.CallbackQuery, nil)
 		}
 
 		// Register user for the bot
@@ -100,11 +101,11 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string, nex
 		replyText = "Unknown callback 🧐"
 	}
 
-	return replyText, createAction(update.CallbackQuery, nil)
+	return replyText, createNextAction(update.CallbackQuery, nil)
 }
 
-// Create nee action keyboard by modifying the existing message
-func createAction(callback *tgbotapi.CallbackQuery, markup *tgbotapi.InlineKeyboardMarkup) *tgbotapi.EditMessageReplyMarkupConfig {
+// Create next action keyboard by modifying the existing message
+func createNextAction(callback *tgbotapi.CallbackQuery, markup *tgbotapi.InlineKeyboardMarkup) *tgbotapi.EditMessageReplyMarkupConfig {
 	nextAction := tgbotapi.EditMessageReplyMarkupConfig{
 		BaseEdit: tgbotapi.BaseEdit{
 			ReplyMarkup: markup,
@@ -120,6 +121,7 @@ func createAction(callback *tgbotapi.CallbackQuery, markup *tgbotapi.InlineKeybo
 	return &nextAction
 }
 
+// Get action info from the callbackQuery
 func getActionInfo(callbackQuery *tgbotapi.CallbackQuery) (actionID string, otherIDs []string) {
 	// Actions template is <ActionId>,<otherId1>,<otherId2>
 	var actionParts = strings.Split(callbackQuery.Data, actionDelimeter)

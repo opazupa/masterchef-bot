@@ -72,12 +72,12 @@ func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]inte
 	return &results
 }
 
+// Add save button if user is registered
 func addSaveButton(isRegistered bool) *tgbotapi.InlineKeyboardMarkup {
 
 	// Hide buttons if user is not registered
 	if !isRegistered {
 		return nil
 	}
-
-	return callback.RegisteredActions.SaveAction.AddButton()
+	return callback.RegisteredActions.SaveAction.CreateButton()
 }

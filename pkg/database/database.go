@@ -50,10 +50,12 @@ func init() {
 	Manager = &manager{db: client.Database(configuration.DatabaseName), ctx: &ctx}
 }
 
+// Get given collection from mongo DB
 func (mgr *manager) Get(collectionName string) *mongo.Collection {
 	return mgr.db.Collection(collectionName)
 }
 
+// Get DB ctx
 func (mgr *manager) GetContext() *context.Context {
 	return mgr.ctx
 }
