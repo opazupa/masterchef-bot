@@ -84,7 +84,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 
 		// Give option to register to new users
 		if user == nil {
-			reply.ReplyMarkup = addRegisterButton()
+			reply.ReplyMarkup = callback.RegisteredActions.RegisterAction.AddButton()
 		}
 	default:
 		return nil, fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)

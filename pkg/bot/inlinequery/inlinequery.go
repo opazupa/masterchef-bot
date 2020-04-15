@@ -1,7 +1,6 @@
 package inlinequery
 
 import (
-	"fmt"
 	"masterchef_bot/pkg/bot/callback"
 	"masterchef_bot/pkg/recipeapi"
 	"strconv"
@@ -66,25 +65,19 @@ func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]inte
 			ThumbURL:    "https://cmkt-image-prd.freetls.fastly.net/0.1.0/ps/7519111/600/400/m2/fpnw/wm0/chef-hat-illustration-for-cooking-logo-with-love-element-.jpg?1577620994&s=54f7c96e07ef7b7479f9606910bc167c",
 			HideURL:     true,
 			Description: recipe.Description,
-			ReplyMarkup: addActionButtons(isRegistered),
+			ReplyMarkup: addSaveButton(isRegistered),
 		})
 	}
 
 	return &results
 }
 
-func addActionButtons(isRegistered bool) *tgbotapi.InlineKeyboardMarkup {
+func addSaveButton(isRegistered bool) *tgbotapi.InlineKeyboardMarkup {
 
 	// Hide buttons if user is not registered
 	if !isRegistered {
 		return nil
 	}
 
-	saveAction := callback.RegisteredActions.SaveAction
-	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(saveAction.Text, fmt.Sprint(saveAction.ID)),
-		),
-	)
-	return &keyboard
+	return callback.RegisteredActions.SaveAction.AddButton()
 }

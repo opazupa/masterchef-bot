@@ -3,6 +3,7 @@ package callback
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"masterchef_bot/pkg/database/recipecollection"
 	selection "masterchef_bot/pkg/database/selectedrecipecollection"
@@ -37,12 +38,30 @@ var RegisteredActions = &Actions{
 	},
 }
 
+const (
+	// ActionDelimeter for action mappings
+	actionDelimeter  string = ","
+	actionIDPosition        = 0
+	otherIDsPosotion        = 1
+)
+
+func (action callbackAction) AddButton(otherIds ...string) *tgbotapi.InlineKeyboardMarkup {
+
+	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(action.Text, fmt.Sprint(action.ID, actionDelimeter, strings.Join(otherIds, actionDelimeter))),
+		),
+	)
+	return &keyboard
+}
+
 // Handle callbackquery updates and next action
 func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string, nextAction *tgbotapi.EditMessageReplyMarkupConfig) {
 
 	var replyText string
+	action, _ := getActionInfo(update.CallbackQuery)
 
-	switch update.CallbackQuery.Data {
+	switch action {
 	case RegisteredActions.SaveAction.ID:
 		if user == nil {
 			return "Register first to start collecting recipes.", createAction(update.CallbackQuery, nil)
@@ -99,4 +118,10 @@ func createAction(callback *tgbotapi.CallbackQuery, markup *tgbotapi.InlineKeybo
 		nextAction.MessageID = callback.Message.MessageID
 	}
 	return &nextAction
+}
+
+func getActionInfo(callbackQuery *tgbotapi.CallbackQuery) (actionID string, otherIDs []string) {
+	// Actions template is <ActionId>,<otherId1>,<otherId2>
+	var actionParts = strings.Split(callbackQuery.Data, actionDelimeter)
+	return actionParts[actionIDPosition], actionParts[otherIDsPosotion:]
 }
