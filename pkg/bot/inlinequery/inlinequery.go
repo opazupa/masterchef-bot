@@ -51,11 +51,6 @@ func GetRecipeInfo(update *tgbotapi.Update) (name string, url string) {
 // Convert recipe results to InlineQueryResults
 func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]interface{} {
 
-	titleTemplate := `
-%s
-%s
-%s`
-
 	results := make([]interface{}, 0)
 	for i, recipe := range (*recipes)[:resultLimit] {
 		results = append(results, tgbotapi.InlineQueryResultArticle{
@@ -63,7 +58,7 @@ func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]inte
 			ID:    strconv.Itoa(i + 1),
 			Title: recipe.Title,
 			InputMessageContent: tgbotapi.InputTextMessageContent{
-				Text: fmt.Sprintf(titleTemplate, recipeResultPrefix, recipe.Title, recipe.URL),
+				Text: recipe.ToMessage(recipeResultPrefix),
 			},
 			URL:         recipe.URL,
 			ThumbHeight: 8,

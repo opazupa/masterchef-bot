@@ -1,8 +1,10 @@
 package recipecollection
 
 import (
+	"fmt"
 	"log"
 	"masterchef_bot/pkg/database"
+	templates "masterchef_bot/pkg/helpers"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,7 +20,14 @@ type Recipe struct {
 	Added  time.Time          `bson:"Added"`
 }
 
-const collection = "recipes"
+const (
+	collection = "recipes"
+)
+
+// ToMessage from recipe with given title
+func (recipe *Recipe) ToMessage(header string) (message string) {
+	return fmt.Sprintf(templates.RecipeMessage, header, recipe.Name, recipe.URL)
+}
 
 // Add new recipe
 func Add(name string, url string, userID primitive.ObjectID) (*Recipe, error) {
@@ -47,7 +56,7 @@ func GetByUser(userID primitive.ObjectID) *[]Recipe {
 		},
 	}
 
-	results := []Recipe{}
+	var results []Recipe
 
 	ctx := *database.Manager.GetContext()
 	cursor, err := database.Manager.Get(collection).Find(ctx, filter)
@@ -55,13 +64,7 @@ func GetByUser(userID primitive.ObjectID) *[]Recipe {
 		log.Print(err)
 		return &results
 	}
-	// Iterate through the returned cursor.
-	for cursor.Next(ctx) {
-		var doc Recipe
-		cursor.Decode(&doc)
-		results = append(results, doc)
-	}
-
+	cursor.All(ctx, &results)
 	return &results
 }
 
@@ -82,4 +85,23 @@ func GetByID(id primitive.ObjectID) *Recipe {
 	}
 
 	return &result
+}
+
+// GetRandom recipes from collection
+func GetRandom(amount int) *[]Recipe {
+
+	pipeline := []bson.M{{
+		"$sample": bson.D{{Key: "size", Value: amount}},
+	}}
+
+	var results []Recipe
+
+	ctx := *database.Manager.GetContext()
+	cursor, err := database.Manager.Get(collection).Aggregate(ctx, pipeline)
+	if err != nil {
+		log.Print(err)
+		return &results
+	}
+	cursor.All(ctx, &results)
+	return &results
 }

@@ -8,6 +8,8 @@ import (
 	"regexp"
 	"strings"
 
+	templates "masterchef_bot/pkg/helpers"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -33,6 +35,11 @@ func SearchRecipes(recipe string) (recipes *[]Recipe) {
 	}
 	// Parse results to Recipes
 	return parseDuckDuckGoRecipes(html)
+}
+
+// ToMessage from recipe with given title
+func (recipe *Recipe) ToMessage(header string) (message string) {
+	return fmt.Sprintf(templates.RecipeMessage, header, recipe.Title, recipe.URL)
 }
 
 // Get duckduckgo search result
