@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"masterchef_bot/pkg/database"
+	"masterchef_bot/pkg/database/selectedrecipecollection"
 	templates "masterchef_bot/pkg/helpers"
 	"time"
 
@@ -30,25 +31,25 @@ func (recipe *Recipe) ToMessage(header string) (message string) {
 }
 
 // Add new recipe
-func Add(name string, url string, userID primitive.ObjectID) (*Recipe, error) {
+func Add(recipe *selectedrecipecollection.SelectedRecipe) (addedRecipe *Recipe, err error) {
 	newRecipe := bson.M{
-		"Name":   name,
-		"URL":    url,
-		"UserID": userID,
+		"Name":   recipe.Name,
+		"URL":    recipe.URL,
+		"UserID": recipe.UserID,
 		"Added":  time.Now(),
 	}
 
 	inserted, err := database.Manager.Get(collection).InsertOne(*database.Manager.GetContext(), newRecipe)
 	if err != nil {
 		log.Print(err)
-		return nil, err
+		return
 	}
-
-	return GetByID(inserted.InsertedID.(primitive.ObjectID)), nil
+	addedRecipe, err = GetByID(inserted.InsertedID.(primitive.ObjectID))
+	return
 }
 
 // GetByUser from collection
-func GetByUser(userID primitive.ObjectID) *[]Recipe {
+func GetByUser(userID primitive.ObjectID) (recipes *[]Recipe) {
 
 	filter := bson.D{
 		primitive.E{
@@ -56,52 +57,51 @@ func GetByUser(userID primitive.ObjectID) *[]Recipe {
 		},
 	}
 
-	var results []Recipe
-
 	ctx := *database.Manager.GetContext()
 	cursor, err := database.Manager.Get(collection).Find(ctx, filter)
 	if err != nil {
 		log.Print(err)
-		return &results
+		return
 	}
-	cursor.All(ctx, &results)
-	return &results
+
+	recipes = &[]Recipe{}
+	cursor.All(ctx, recipes)
+	return
 }
 
 // GetByID from collection
-func GetByID(id primitive.ObjectID) *Recipe {
+func GetByID(id primitive.ObjectID) (recipe *Recipe, err error) {
 
+	recipe = &Recipe{}
 	filter := bson.D{
 		primitive.E{
 			Key: "_id", Value: id,
 		},
 	}
-	var result Recipe
 
-	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(&result)
+	err = database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(recipe)
 	if err != nil {
 		log.Print(err)
-		return nil
+		recipe = nil
 	}
-
-	return &result
+	return
 }
 
 // GetRandom recipes from collection
-func GetRandom(amount int) *[]Recipe {
+func GetRandom(amount int) (recipes *[]Recipe) {
 
 	pipeline := []bson.M{{
 		"$sample": bson.D{{Key: "size", Value: amount}},
 	}}
 
-	var results []Recipe
-
 	ctx := *database.Manager.GetContext()
 	cursor, err := database.Manager.Get(collection).Aggregate(ctx, pipeline)
 	if err != nil {
 		log.Print(err)
-		return &results
+		return
 	}
-	cursor.All(ctx, &results)
-	return &results
+
+	recipes = &[]Recipe{}
+	cursor.All(ctx, recipes)
+	return
 }

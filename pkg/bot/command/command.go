@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"masterchef_bot/pkg/bot/callback"
@@ -9,6 +10,7 @@ import (
 	"masterchef_bot/pkg/database/usercollection"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/thoas/go-funk"
 )
 
 // Command type
@@ -65,33 +67,58 @@ to store your name and telegram id.
 }
 
 // Handle command for bot
-func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) (msg *tgbotapi.MessageConfig, err error) {
+func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) (reply *tgbotapi.MessageConfig, err error) {
 
-	var reply tgbotapi.MessageConfig
+	var message = tgbotapi.MessageConfig{
+		ParseMode: "Markdown",
+	}
 
 	switch update.Message.Command() {
 
+	/*
+		Help command
+		-------------
+		Next Action: nil
+	*/
 	case commands.Help.Key:
-		reply = tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Help.Description, botName))
+		message = tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Help.Description, botName))
 
+	/*
+		Random command
+		-------------
+		Next Action: Favourite action
+	*/
 	case commands.Random.Key:
 		// Get a random recipe
-		if recipes := *recipecollection.GetRandom(1); len(recipes) > 0 {
-			reply = tgbotapi.NewMessage(update.Message.Chat.ID, recipes[0].ToMessage(commands.Random.Description))
+		var a *[]int = &[]int{1, 2, 3}
+		log.Print(a)
+		log.Print(funk.Any(a))
+		log.Print(funk.Any(&a))
+		if recipes := *recipecollection.GetRandom(1); true {
+			log.Print(recipes)
+			log.Print(funk.Any((&recipes)))
+			message = tgbotapi.NewMessage(update.Message.Chat.ID, (recipes)[0].ToMessage(commands.Random.Description))
+		} else {
+			err = fmt.Errorf("No recipes returned for the random one")
 		}
-		return nil, fmt.Errorf("No recipes returned for the random one")
+
+	/*
+		Start command
+		-------------
+		Next Action: Register action
+	*/
 	case commands.Start.Key:
-		reply = tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Start.Description, botName))
+		message = tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Start.Description, botName))
 
 		// Give option to register to new users
 		if user == nil {
-			reply.ReplyMarkup = callback.RegisteredActions.RegisterAction.CreateButton()
+			message.ReplyMarkup = callback.RegisteredActions.RegisterAction.CreateButton()
 		}
 	default:
-		return nil, fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
+		err = fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
 	}
-	reply.ParseMode = "Markdown"
-	return &reply, nil
+
+	return &message, err
 }
 
 // Finalize markdown with correct chars

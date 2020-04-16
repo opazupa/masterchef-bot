@@ -23,7 +23,7 @@ type SelectedRecipe struct {
 const collection = "selectedrecipes"
 
 // Save new selection for user in a given chat
-func Save(name string, url string, chatID int64, userID primitive.ObjectID) error {
+func Save(name string, url string, chatID int64, userID primitive.ObjectID) (err error) {
 
 	userFilter := bson.M{
 		"ChatID": chatID,
@@ -43,20 +43,19 @@ func Save(name string, url string, chatID int64, userID primitive.ObjectID) erro
 	}
 	// Try to update if the exsiting user and chat is found
 	res := database.Manager.Get(collection).FindOneAndUpdate(*database.Manager.GetContext(), userFilter, update, &opt)
-	if res.Err() != nil {
+	if err = res.Err(); err != nil {
 		log.Print(res.Err())
 	}
-	return res.Err()
+	return
 }
 
 // GetByUser from the collection
-func GetByUser(userID primitive.ObjectID) *SelectedRecipe {
+func GetByUser(userID primitive.ObjectID) (recipe *SelectedRecipe) {
 
+	recipe = &SelectedRecipe{}
 	filter := bson.M{
 		"UserID": userID,
 	}
-
-	var result SelectedRecipe
 
 	opt := options.FindOne()
 	// Sort by `Selected` field descending
@@ -66,11 +65,11 @@ func GetByUser(userID primitive.ObjectID) *SelectedRecipe {
 		},
 	})
 
-	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter, opt).Decode(&result)
+	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter, opt).Decode(recipe)
 	if err != nil {
 		log.Print(err)
-		return nil
+		recipe = nil
 	}
 
-	return &result
+	return
 }

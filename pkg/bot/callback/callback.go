@@ -10,6 +10,8 @@ import (
 	"masterchef_bot/pkg/database/usercollection"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/thoas/go-funk"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // callbackAction type
@@ -20,8 +22,9 @@ type callbackAction struct {
 
 // Actions type
 type Actions struct {
-	RegisterAction callbackAction
-	SaveAction     callbackAction
+	RegisterAction  callbackAction
+	SaveAction      callbackAction
+	FavouriteAction callbackAction
 }
 
 // RegisteredActions for callbacks
@@ -29,12 +32,17 @@ var RegisteredActions = &Actions{
 	// SaveAction for save recipe buttons
 	SaveAction: callbackAction{
 		ID:   "1",
-		Text: "Save 👊",
+		Text: "Save 😛",
 	},
 	// RegisterAction for register user button
 	RegisterAction: callbackAction{
 		ID:   "2",
 		Text: "Hop on 👌",
+	},
+	// FavouriteAction for collecting fav recipes
+	FavouriteAction: callbackAction{
+		ID:   "3",
+		Text: "Add to favourites 👍",
 	},
 }
 
@@ -50,65 +58,110 @@ func (action callbackAction) CreateButton(otherIds ...string) *tgbotapi.InlineKe
 
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(action.Text, fmt.Sprint(action.ID, actionDelimeter, strings.Join(otherIds, actionDelimeter))),
+			tgbotapi.NewInlineKeyboardButtonData(
+				action.Text,
+				fmt.Sprint(
+					action.ID,
+					actionDelimeter,
+					strings.Join(otherIds, actionDelimeter),
+				)),
 		),
 	)
 	return &keyboard
 }
 
 // Handle callbackquery updates and next action
-func Handle(update *tgbotapi.Update, user *usercollection.User) (msg string, nextAction *tgbotapi.EditMessageReplyMarkupConfig) {
+func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage string, nextAction *tgbotapi.EditMessageReplyMarkupConfig) {
 
-	var replyText string
-	action, _ := getActionInfo(update.CallbackQuery)
+	// Default to shot the existing one
+	nextAction = nil
 
+	action, targetIDs := getActionInfo(update.CallbackQuery)
 	switch action {
+
+	/*
+		Save Action.
+		-------------
+		Next Action: Favourite Action
+	*/
 	case RegisteredActions.SaveAction.ID:
 		if user == nil {
-			return "Register first to start collecting recipes.", createNextAction(update.CallbackQuery, nil)
+			replyMessage = "Register first to start collecting recipes."
+			break
 		}
 
 		// Get user's selection from database
 		selectedRecipe := selection.GetByUser(user.ID)
 		if selectedRecipe == nil {
-			return "Something went wrong when fetching the selected recipe 🧐", createNextAction(update.CallbackQuery, nil)
+			replyMessage = "Something went wrong when fetching the selected recipe 🧐"
+			break
 		}
 
 		// Save recipe to database
-		_, err := recipecollection.Add(selectedRecipe.Name, selectedRecipe.URL, user.ID)
+		_, err := recipecollection.Add(selectedRecipe)
 
 		if err == nil {
-			replyText = fmt.Sprintf("Recipe saved 😛")
+			replyMessage = fmt.Sprintf("Recipe saved 😛")
 		} else {
-			replyText = fmt.Sprintf("Failed to save the recipe ☹")
+			replyMessage = fmt.Sprintf("Failed to save the recipe 😕")
 		}
 
+	/*
+		Register Action.
+		-------------
+		Next Action: empty
+	*/
 	case RegisteredActions.RegisterAction.ID:
+
+		// With empty content
+		nextAction = createNextAction(update.CallbackQuery, nil)
 		if user != nil {
-			return "You're already registered.", createNextAction(update.CallbackQuery, nil)
+			replyMessage = "You're already registered."
+			break
 		}
 
 		// Register user for the bot
 		newUser, err := usercollection.Create(update.CallbackQuery.From.UserName, update.CallbackQuery.From.ID)
 		if err == nil {
-			replyText = fmt.Sprintf("User [%s] registered 🔥", newUser.UserName)
+			replyMessage = fmt.Sprintf("User [%s] registered 🔥", newUser.UserName)
 		} else {
-			replyText = fmt.Sprintf("Failed to register user [%s]", update.CallbackQuery.From.UserName)
+			replyMessage = fmt.Sprintf("Failed to register user [%s]", update.CallbackQuery.From.UserName)
+		}
+
+	/*
+		Save Action.
+		-------------
+		Next Action: nil
+	*/
+	case RegisteredActions.FavouriteAction.ID:
+		// TODO olli how to set it as favourite
+		if user == nil {
+			replyMessage = "Register first to start adding favourites."
+			break
+		}
+		if recipeID, ok := funk.Head(targetIDs).(primitive.ObjectID); ok {
+
+			err := user.AddFavourite(recipeID)
+			if err != nil || !ok {
+				replyMessage = "Something went wrong when saving favourite recipe 🧐"
+				break
+			}
+
+			replyMessage = "Recipe favourited 💟"
 		}
 
 	default:
 		log.Printf("Unregocnized callback (%s) from user [%s]", update.CallbackQuery.Data, update.CallbackQuery.From.UserName)
-		replyText = "Unknown callback 🧐"
+		replyMessage = "Unknown callback 🧐"
 	}
-
-	return replyText, createNextAction(update.CallbackQuery, nil)
+	return
 }
 
 // Create next action keyboard by modifying the existing message
-func createNextAction(callback *tgbotapi.CallbackQuery, markup *tgbotapi.InlineKeyboardMarkup) *tgbotapi.EditMessageReplyMarkupConfig {
+func createNextAction(callback *tgbotapi.CallbackQuery, content *tgbotapi.InlineKeyboardMarkup) *tgbotapi.EditMessageReplyMarkupConfig {
 	nextAction := tgbotapi.EditMessageReplyMarkupConfig{
 		BaseEdit: tgbotapi.BaseEdit{
-			ReplyMarkup: markup,
+			ReplyMarkup: content,
 		},
 	}
 	if callback.InlineMessageID != "" {

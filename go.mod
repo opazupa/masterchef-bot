@@ -12,7 +12,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
-	github.com/thoas/go-funk v0.6.0 // indirect
+	github.com/thoas/go-funk v0.6.0
 	github.com/tidwall/pretty v1.0.0 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
