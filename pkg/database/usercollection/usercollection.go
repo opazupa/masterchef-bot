@@ -7,7 +7,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Favourite
@@ -84,10 +83,16 @@ func GetByUserName(userName *string) (user *User) {
 }
 
 // AddFavourite for user
-func (user *User) AddFavourite(recipeID primitive.ObjectID) (err error) {
+func (user *User) AddFavourite(recipeID string) (err error) {
+
+	objID, err := primitive.ObjectIDFromHex(recipeID)
+	if err != nil {
+		log.Print(err)
+		return
+	}
 
 	newFavourite := favourite{
-		RecipeID: recipeID,
+		RecipeID: objID,
 		Added:    time.Now(),
 	}
 	userFilter := bson.M{
@@ -96,19 +101,15 @@ func (user *User) AddFavourite(recipeID primitive.ObjectID) (err error) {
 
 	// Add the new recipe to the collection if not existing
 	update := bson.M{
-		"addToSet": bson.M{
+		"$addToSet": bson.M{
 			"Favourites": newFavourite,
 		},
 	}
 
-	upsert := true
-	opt := options.FindOneAndUpdateOptions{
-		Upsert: &upsert,
-	}
 	// Try to update if the exsiting user
-	res := database.Manager.Get(collection).FindOneAndUpdate(*database.Manager.GetContext(), userFilter, update, &opt)
-	if err = res.Err(); err != nil {
-		log.Print(res.Err())
+	_, err = database.Manager.Get(collection).UpdateOne(*database.Manager.GetContext(), userFilter, update)
+	if err != nil {
+		log.Print(err)
 	}
 	return
 }

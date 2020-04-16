@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"masterchef_bot/pkg/bot/callback"
@@ -90,14 +89,11 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 	*/
 	case commands.Random.Key:
 		// Get a random recipe
-		var a *[]int = &[]int{1, 2, 3}
-		log.Print(a)
-		log.Print(funk.Any(a))
-		log.Print(funk.Any(&a))
-		if recipes := *recipecollection.GetRandom(1); true {
-			log.Print(recipes)
-			log.Print(funk.Any((&recipes)))
-			message = tgbotapi.NewMessage(update.Message.Chat.ID, (recipes)[0].ToMessage(commands.Random.Description))
+		if recipes := *recipecollection.GetRandom(1); funk.Any(recipes) {
+			message = tgbotapi.NewMessage(update.Message.Chat.ID, recipes[0].ToMessage(commands.Random.Description))
+
+			// Add action
+			message.ReplyMarkup = callback.Actions.Favourite.Create(recipes[0].ID.Hex())
 		} else {
 			err = fmt.Errorf("No recipes returned for the random one")
 		}
@@ -112,8 +108,9 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 
 		// Give option to register to new users
 		if user == nil {
-			message.ReplyMarkup = callback.RegisteredActions.RegisterAction.CreateButton()
+			message.ReplyMarkup = callback.Actions.Register.Create()
 		}
+
 	default:
 		err = fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
 	}

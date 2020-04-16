@@ -55,8 +55,7 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 	for update := range updates {
 
 		// Check if the user is registered!
-		user := getUser(update)
-		registeredUser := usercollection.GetByUserName(user)
+		registeredUser := usercollection.GetByUserName(getUser(update))
 
 		if update.InlineQuery != nil {
 			// When user searches recipes with inline query
@@ -80,7 +79,7 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 				Text:            replyText,
 			}
 
-			// Hide action buttons from the inline query
+			// Update inline action buttons
 			if nextAction != nil {
 				bot.Send(nextAction)
 			}

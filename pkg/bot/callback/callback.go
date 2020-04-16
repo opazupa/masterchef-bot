@@ -11,7 +11,6 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/thoas/go-funk"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // callbackAction type
@@ -20,27 +19,27 @@ type callbackAction struct {
 	Text string
 }
 
-// Actions type
-type Actions struct {
-	RegisterAction  callbackAction
-	SaveAction      callbackAction
-	FavouriteAction callbackAction
+// RegisteredActions type
+type RegisteredActions struct {
+	Register  callbackAction
+	Save      callbackAction
+	Favourite callbackAction
 }
 
-// RegisteredActions for callbacks
-var RegisteredActions = &Actions{
-	// SaveAction for save recipe buttons
-	SaveAction: callbackAction{
+// Actions for callbacks
+var Actions = &RegisteredActions{
+	// Save Action for save recipe buttons
+	Save: callbackAction{
 		ID:   "1",
 		Text: "Save 😛",
 	},
-	// RegisterAction for register user button
-	RegisterAction: callbackAction{
+	// Register Action for register user button
+	Register: callbackAction{
 		ID:   "2",
 		Text: "Hop on 👌",
 	},
-	// FavouriteAction for collecting fav recipes
-	FavouriteAction: callbackAction{
+	// Favourite Action for collecting fav recipes
+	Favourite: callbackAction{
 		ID:   "3",
 		Text: "Add to favourites 👍",
 	},
@@ -48,13 +47,13 @@ var RegisteredActions = &Actions{
 
 const (
 	// ActionDelimeter for action mappings
-	actionDelimeter  string = ","
-	actionIDPosition        = 0
-	otherIDsPosotion        = 1
+	actionDelimeter  = ","
+	actionIDPosition = 0
+	otherIDsPosotion = 1
 )
 
-// CreateButton for inlinekeyboard
-func (action callbackAction) CreateButton(otherIds ...string) *tgbotapi.InlineKeyboardMarkup {
+// Create action to inlinekeyboard
+func (action callbackAction) Create(otherIds ...string) *tgbotapi.InlineKeyboardMarkup {
 
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -75,16 +74,15 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 
 	// Default to shot the existing one
 	nextAction = nil
-
 	action, targetIDs := getActionInfo(update.CallbackQuery)
-	switch action {
 
+	switch action {
 	/*
 		Save Action.
 		-------------
 		Next Action: Favourite Action
 	*/
-	case RegisteredActions.SaveAction.ID:
+	case Actions.Save.ID:
 		if user == nil {
 			replyMessage = "Register first to start collecting recipes."
 			break
@@ -111,7 +109,7 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 		-------------
 		Next Action: empty
 	*/
-	case RegisteredActions.RegisterAction.ID:
+	case Actions.Register.ID:
 
 		// With empty content
 		nextAction = createNextAction(update.CallbackQuery, nil)
@@ -133,22 +131,20 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 		-------------
 		Next Action: nil
 	*/
-	case RegisteredActions.FavouriteAction.ID:
-		// TODO olli how to set it as favourite
+	case Actions.Favourite.ID:
+		log.Println(funk.Head(targetIDs))
 		if user == nil {
 			replyMessage = "Register first to start adding favourites."
 			break
 		}
-		if recipeID, ok := funk.Head(targetIDs).(primitive.ObjectID); ok {
 
-			err := user.AddFavourite(recipeID)
-			if err != nil || !ok {
-				replyMessage = "Something went wrong when saving favourite recipe 🧐"
-				break
-			}
-
-			replyMessage = "Recipe favourited 💟"
+		err := user.AddFavourite(funk.Head(targetIDs).(string))
+		if err != nil {
+			replyMessage = "Something went wrong when saving favourite recipe 🧐"
+			break
 		}
+
+		replyMessage = "Recipe favourited 💟"
 
 	default:
 		log.Printf("Unregocnized callback (%s) from user [%s]", update.CallbackQuery.Data, update.CallbackQuery.From.UserName)
