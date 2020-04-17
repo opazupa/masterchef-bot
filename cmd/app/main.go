@@ -55,25 +55,25 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 	for update := range updates {
 
 		// Check if the user is registered!
-		registeredUser := usercollection.GetByUserName(getUser(update))
+		user := usercollection.GetByUserName(getUser(update))
 
 		if update.InlineQuery != nil {
 			// When user searches recipes with inline query
-			results := inlinequery.Handle(&update, registeredUser != nil)
+			results := inlinequery.Handle(&update, user.IsRegistered())
 			response := tgbotapi.InlineConfig{
 				InlineQueryID: update.InlineQuery.ID,
 				Results:       *results,
 			}
 			bot.AnswerInlineQuery(response)
 
-		} else if inlinequery.IsRecipe(&update) && registeredUser != nil {
+		} else if inlinequery.IsRecipe(&update) && user.IsRegistered() {
 			// When registered user selects a recipe from inline query
 			recipeName, recipeURL := inlinequery.GetRecipeInfo(&update)
-			selection.Save(recipeName, recipeURL, update.Message.Chat.ID, registeredUser.ID)
+			selection.Save(recipeName, recipeURL, update.Message.Chat.ID, user.ID)
 
 		} else if update.CallbackQuery != nil {
 			// When user interacts with inline buttons
-			replyText, nextAction := callback.Handle(&update, registeredUser)
+			replyText, nextAction := callback.Handle(&update, user)
 			response := tgbotapi.CallbackConfig{
 				CallbackQueryID: update.CallbackQuery.ID,
 				Text:            replyText,
@@ -87,7 +87,7 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 
 		} else if update.Message != nil && update.Message.IsCommand() {
 			// When user enters a command
-			msg, err := command.Handle(&update, bot.Self.UserName, registeredUser)
+			msg, err := command.Handle(&update, bot.Self.UserName, user)
 			if err == nil {
 				bot.Send(msg)
 			}

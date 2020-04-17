@@ -26,7 +26,7 @@ const (
 )
 
 // ToMessage from recipe with given title
-func (recipe *Recipe) ToMessage(header string) (message string) {
+func (recipe Recipe) ToMessage(header string) (message string) {
 	return fmt.Sprintf(templates.RecipeMessage, header, recipe.Name, recipe.URL)
 }
 

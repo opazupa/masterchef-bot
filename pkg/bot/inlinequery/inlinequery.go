@@ -79,5 +79,5 @@ func addSaveButton(isRegistered bool) *tgbotapi.InlineKeyboardMarkup {
 	if !isRegistered {
 		return nil
 	}
-	return callback.Actions.Save.Create()
+	return callback.AddActions([]callback.Action{callback.Actions.Save})
 }

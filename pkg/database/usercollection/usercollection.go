@@ -138,3 +138,8 @@ func (user *User) RemoveFavourite(recipeID string) (removed bool, err error) {
 	removed = opts.ModifiedCount != 0
 	return
 }
+
+// IsRegistered
+func (user *User) IsRegistered() bool {
+	return user != nil
+}

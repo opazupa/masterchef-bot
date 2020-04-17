@@ -90,10 +90,10 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 	case commands.Random.Key:
 		// Get a random recipe
 		if recipes := *recipecollection.GetRandom(1); funk.Any(recipes) {
-			message = tgbotapi.NewMessage(update.Message.Chat.ID, recipes[0].ToMessage(commands.Random.Description))
+			message = tgbotapi.NewMessage(update.Message.Chat.ID, funk.Head(recipes).(recipecollection.Recipe).ToMessage(commands.Random.Description))
 
 			// Add action
-			message.ReplyMarkup = callback.Actions.Favourite.Create(recipes[0].ID.Hex())
+			message.ReplyMarkup = callback.AddActions([]callback.Action{callback.Actions.Favourite, callback.Actions.Unfavourite}, funk.Head(recipes).(recipecollection.Recipe).ID.Hex())
 		} else {
 			err = fmt.Errorf("No recipes returned for the random one")
 		}
@@ -108,7 +108,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 
 		// Give option to register to new users
 		if user == nil {
-			message.ReplyMarkup = callback.Actions.Register.Create()
+			message.ReplyMarkup = callback.AddActions([]callback.Action{callback.Actions.Register})
 		}
 
 	default:
