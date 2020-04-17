@@ -7,6 +7,8 @@ I'm a **`MasterChefBot`** and ready to help you in the kitchen!
 ## Get it cooking :pizza:
 - Search recipes
 - Sign up and collect recipes
+    - Add your own ones
+    - Favourite others
 - Get random recipe
 
 

@@ -72,8 +72,8 @@ func (action callbackAction) Create(otherIds ...string) *tgbotapi.InlineKeyboard
 // Handle callbackquery updates and next action
 func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage string, nextAction *tgbotapi.EditMessageReplyMarkupConfig) {
 
-	// Default to shot the existing one
-	nextAction = nil
+	// Default to clear the actions
+	nextAction = createNextAction(empty, update.CallbackQuery, nil)
 	action, targetIDs := getActionInfo(update.CallbackQuery)
 
 	switch action {
@@ -96,10 +96,11 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 		}
 
 		// Save recipe to database
-		_, err := recipecollection.Add(selectedRecipe)
+		recipe, err := recipecollection.Add(selectedRecipe)
 
 		if err == nil {
 			replyMessage = fmt.Sprintf("Recipe saved 😛")
+			nextAction = createNextAction(new, update.CallbackQuery, Actions.Favourite.Create(recipe.ID.Hex()))
 		} else {
 			replyMessage = fmt.Sprintf("Failed to save the recipe 😕")
 		}
@@ -111,8 +112,6 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 	*/
 	case Actions.Register.ID:
 
-		// With empty content
-		nextAction = createNextAction(update.CallbackQuery, nil)
 		if user != nil {
 			replyMessage = "You're already registered."
 			break
@@ -132,19 +131,24 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 		Next Action: nil
 	*/
 	case Actions.Favourite.ID:
-		log.Println(funk.Head(targetIDs))
+
+		nextAction = createNextAction(noChanges, update.CallbackQuery, nil)
+
 		if user == nil {
 			replyMessage = "Register first to start adding favourites."
 			break
 		}
 
-		err := user.AddFavourite(funk.Head(targetIDs).(string))
+		added, err := user.AddFavourite(funk.Head(targetIDs).(string))
 		if err != nil {
 			replyMessage = "Something went wrong when saving favourite recipe 🧐"
 			break
 		}
-
-		replyMessage = "Recipe favourited 💟"
+		if added {
+			replyMessage = "Recipe favourited 💟"
+		} else {
+			replyMessage = "Recipe already favourited!"
+		}
 
 	default:
 		log.Printf("Unregocnized callback (%s) from user [%s]", update.CallbackQuery.Data, update.CallbackQuery.From.UserName)
@@ -153,8 +157,28 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 	return
 }
 
+type nextActionType int
+
+const (
+	empty     nextActionType = 1
+	noChanges nextActionType = 2
+	new       nextActionType = 3
+)
+
 // Create next action keyboard by modifying the existing message
-func createNextAction(callback *tgbotapi.CallbackQuery, content *tgbotapi.InlineKeyboardMarkup) *tgbotapi.EditMessageReplyMarkupConfig {
+func createNextAction(next nextActionType, callback *tgbotapi.CallbackQuery, content *tgbotapi.InlineKeyboardMarkup) *tgbotapi.EditMessageReplyMarkupConfig {
+
+	// Return no changes
+	if next == noChanges {
+		return nil
+	}
+
+	// Return empty action bar content
+	if next == empty {
+		content = nil
+	}
+
+	// Set the properties
 	nextAction := tgbotapi.EditMessageReplyMarkupConfig{
 		BaseEdit: tgbotapi.BaseEdit{
 			ReplyMarkup: content,

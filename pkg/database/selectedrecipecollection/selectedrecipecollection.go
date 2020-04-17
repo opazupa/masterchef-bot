@@ -59,10 +59,8 @@ func GetByUser(userID primitive.ObjectID) (recipe *SelectedRecipe) {
 
 	opt := options.FindOne()
 	// Sort by `Selected` field descending
-	opt.SetSort(bson.D{
-		bson.E{
-			Key: "Selected", Value: -1,
-		},
+	opt.SetSort(bson.M{
+		"Selected": -1,
 	})
 
 	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter, opt).Decode(recipe)

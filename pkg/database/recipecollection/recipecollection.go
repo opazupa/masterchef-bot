@@ -51,10 +51,8 @@ func Add(recipe *selectedrecipecollection.SelectedRecipe) (addedRecipe *Recipe, 
 // GetByUser from collection
 func GetByUser(userID primitive.ObjectID) (recipes *[]Recipe) {
 
-	filter := bson.D{
-		primitive.E{
-			Key: "UserID", Value: userID,
-		},
+	filter := bson.M{
+		"UserID": userID,
 	}
 
 	ctx := *database.Manager.GetContext()
@@ -73,10 +71,8 @@ func GetByUser(userID primitive.ObjectID) (recipes *[]Recipe) {
 func GetByID(id primitive.ObjectID) (recipe *Recipe, err error) {
 
 	recipe = &Recipe{}
-	filter := bson.D{
-		primitive.E{
-			Key: "_id", Value: id,
-		},
+	filter := bson.M{
+		"_id": id,
 	}
 
 	err = database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(recipe)
@@ -91,7 +87,9 @@ func GetByID(id primitive.ObjectID) (recipe *Recipe, err error) {
 func GetRandom(amount int) (recipes *[]Recipe) {
 
 	pipeline := []bson.M{{
-		"$sample": bson.D{{Key: "size", Value: amount}},
+		"$sample": bson.M{
+			"size": amount,
+		},
 	}}
 
 	ctx := *database.Manager.GetContext()

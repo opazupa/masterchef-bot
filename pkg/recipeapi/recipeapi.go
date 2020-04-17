@@ -43,7 +43,7 @@ func (recipe *Recipe) ToMessage(header string) (message string) {
 }
 
 // Get duckduckgo search result
-func getDuckDuckGoSearchResult(query string) (*goquery.Document, error) {
+func getDuckDuckGoSearchResult(query string) (html *goquery.Document, err error) {
 
 	response, err := http.Get(fmt.Sprintf("%s/html/?q=%s+recipe", recipeapi, url.QueryEscape(query)))
 	if err != nil || response.StatusCode != http.StatusOK {
@@ -53,12 +53,11 @@ func getDuckDuckGoSearchResult(query string) (*goquery.Document, error) {
 	defer response.Body.Close()
 
 	// Load the HTML document
-	html, err := goquery.NewDocumentFromReader(response.Body)
+	html, err = goquery.NewDocumentFromReader(response.Body)
 	if err != nil {
 		log.Printf("Failed to parse search results from duckduckgo. %s", err)
-		return nil, err
 	}
-	return html, nil
+	return
 }
 
 // Parse duckduckgo results html page
