@@ -5,6 +5,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
+	"github.com/thoas/go-funk"
 
 	"masterchef_bot/pkg/bot/callback"
 	"masterchef_bot/pkg/bot/command"
@@ -87,9 +88,9 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 
 		} else if update.Message != nil && update.Message.IsCommand() {
 			// When user enters a command
-			msg, err := command.Handle(&update, bot.Self.UserName, user)
+			messages, err := command.Handle(&update, bot.Self.UserName, user)
 			if err == nil {
-				bot.Send(msg)
+				funk.ForEach(*messages, func(message tgbotapi.MessageConfig) { bot.Send(message) })
 			}
 		}
 	}

@@ -23,6 +23,7 @@ type list struct {
 	Help   command
 	Random command
 	Start  command
+	Top3   command
 }
 
 // Configured commands
@@ -35,6 +36,8 @@ How can I help you *Sir?*
 *Start* with /start command.
 
 *Random recipe* with /random command.
+
+*Top3 recipes* with /top3 command.
 
 *Recipe search*
 Search for recipes by calling
@@ -63,12 +66,16 @@ to store your name and telegram id.
 ''''''
 `,
 	},
+	Top3: command{
+		Key:         "top3",
+		Description: "",
+	},
 }
 
 // Handle command for bot
-func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) (reply *tgbotapi.MessageConfig, err error) {
+func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) (reply *[]tgbotapi.MessageConfig, err error) {
 
-	var message tgbotapi.MessageConfig
+	var messages []tgbotapi.MessageConfig
 
 	switch update.Message.Command() {
 
@@ -78,20 +85,21 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 		Next Action: nil
 	*/
 	case commands.Help.Key:
-		message = tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Help.Description, botName))
+		messages = append(messages, tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Help.Description, botName)))
 
 	/*
 		Random command
 		-------------
-		Next Action: Favourite action
+		Next Action: Favourite action, Unfavourite action
 	*/
 	case commands.Random.Key:
 		// Get a random recipe
 		if recipes := *recipecollection.GetRandom(1); funk.Any(recipes) {
-			message = tgbotapi.NewMessage(update.Message.Chat.ID, funk.Head(recipes).(recipecollection.Recipe).ToMessage(commands.Random.Description))
+			message := tgbotapi.NewMessage(update.Message.Chat.ID, funk.Head(recipes).(recipecollection.Recipe).ToMessage(commands.Random.Description))
 
 			// Add action
 			message.ReplyMarkup = callback.AddActions([]int{callback.FavouriteAction, callback.UnfavouriteAction}, funk.Head(recipes).(recipecollection.Recipe).ID.Hex())
+			messages = append(messages, message)
 		} else {
 			err = fmt.Errorf("No recipes returned for the random one")
 		}
@@ -102,19 +110,32 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 		Next Action: Register action
 	*/
 	case commands.Start.Key:
-		message = tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Start.Description, botName))
+		message := tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Start.Description, botName))
 
 		// Give option to register to new users
 		if user == nil {
 			message.ReplyMarkup = callback.AddActions([]int{callback.RegisterAction})
 		}
 
+		messages = append(messages, message)
+
+	/*
+		Top3 command
+		-------------
+		Next Action: Favourite action, Unfavourite action
+	*/
+	case commands.Top3.Key:
+		// TODO Olli get most popular recipes
+
 	default:
 		err = fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
 	}
 
-	message.ParseMode = "Markdown"
-	return &message, err
+	messages = funk.Map(messages, func(message tgbotapi.MessageConfig) tgbotapi.MessageConfig {
+		message.ParseMode = "Markdown"
+		return message
+	}).([]tgbotapi.MessageConfig)
+	return &messages, err
 }
 
 // Finalize markdown with correct chars
