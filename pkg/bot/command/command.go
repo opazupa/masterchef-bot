@@ -68,9 +68,7 @@ to store your name and telegram id.
 // Handle command for bot
 func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) (reply *tgbotapi.MessageConfig, err error) {
 
-	var message = tgbotapi.MessageConfig{
-		ParseMode: "Markdown",
-	}
+	var message tgbotapi.MessageConfig
 
 	switch update.Message.Command() {
 
@@ -93,7 +91,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 			message = tgbotapi.NewMessage(update.Message.Chat.ID, funk.Head(recipes).(recipecollection.Recipe).ToMessage(commands.Random.Description))
 
 			// Add action
-			message.ReplyMarkup = callback.AddActions([]callback.Action{callback.Actions.Favourite, callback.Actions.Unfavourite}, funk.Head(recipes).(recipecollection.Recipe).ID.Hex())
+			message.ReplyMarkup = callback.AddActions([]int{callback.FavouriteAction, callback.UnfavouriteAction}, funk.Head(recipes).(recipecollection.Recipe).ID.Hex())
 		} else {
 			err = fmt.Errorf("No recipes returned for the random one")
 		}
@@ -108,13 +106,14 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 
 		// Give option to register to new users
 		if user == nil {
-			message.ReplyMarkup = callback.AddActions([]callback.Action{callback.Actions.Register})
+			message.ReplyMarkup = callback.AddActions([]int{callback.RegisterAction})
 		}
 
 	default:
 		err = fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
 	}
 
+	message.ParseMode = "Markdown"
 	return &message, err
 }
 

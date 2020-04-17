@@ -3,6 +3,7 @@ package callback
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"masterchef_bot/pkg/database/recipecollection"
@@ -14,40 +15,47 @@ import (
 )
 
 // Action type
-type Action struct {
-	ID   string
-	Text string
+type action struct {
+	ID             int
+	Text           string
+	nextIDs        []int
+	persistOnClick bool
 }
 
-// RegisteredActions type
-type RegisteredActions struct {
-	Register    Action
-	Save        Action
-	Favourite   Action
-	Unfavourite Action
-}
+// Actions
+const (
+	RegisterAction    int = 1
+	SaveAction        int = 2
+	FavouriteAction   int = 3
+	UnfavouriteAction int = 4
+)
 
-// Actions for callbacks
-var Actions = &RegisteredActions{
-	// Save Action for save recipe buttons
-	Save: Action{
-		ID:   "1",
-		Text: "Save 😛",
-	},
+var registeredActions map[int]action = map[int]action{
 	// Register Action for register user button
-	Register: Action{
-		ID:   "2",
-		Text: "Hop on 👌",
+	RegisterAction: {
+		ID:             RegisterAction,
+		Text:           "Hop on 👌",
+		nextIDs:        nil,
+		persistOnClick: false,
+	},
+	// Save Action for save recipe buttons
+	SaveAction: {
+		ID:             SaveAction,
+		Text:           "Save 😛",
+		nextIDs:        []int{FavouriteAction, UnfavouriteAction},
+		persistOnClick: false,
 	},
 	// Favourite Action for collecting fav recipes
-	Favourite: Action{
-		ID:   "3",
-		Text: "Favourite 👍",
+	FavouriteAction: {
+		ID:             FavouriteAction,
+		Text:           "Favourite 👍",
+		persistOnClick: true,
 	},
 	// Unfavourite Action for cleaning fav recipes
-	Unfavourite: Action{
-		ID:   "4",
-		Text: "Unfavourite ❌",
+	UnfavouriteAction: {
+		ID:             UnfavouriteAction,
+		Text:           "Unfavourite ❌",
+		persistOnClick: true,
 	},
 }
 
@@ -55,17 +63,18 @@ const (
 	// ActionDelimeter for action mappings
 	actionDelimeter  = ","
 	actionIDPosition = 0
-	otherIDsPosotion = 1
+	otherIDsPosition = 1
 )
 
 // AddActions to inlinekeyboard
-func AddActions(actions []Action, otherIds ...string) *tgbotapi.InlineKeyboardMarkup {
+func AddActions(actionIds []int, otherIds ...string) *tgbotapi.InlineKeyboardMarkup {
 
-	if actions == nil || !funk.Any(actions) {
+	if actionIds == nil || !funk.Any(actionIds) {
 		return nil
 	}
 
-	var buttons = funk.Map(actions, func(action Action) tgbotapi.InlineKeyboardButton {
+	var buttons = funk.Map(actionIds, func(id int) tgbotapi.InlineKeyboardButton {
+		action := registeredActions[id]
 		return tgbotapi.NewInlineKeyboardButtonData(
 			action.Text,
 			fmt.Sprint(
@@ -83,16 +92,36 @@ func AddActions(actions []Action, otherIds ...string) *tgbotapi.InlineKeyboardMa
 func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage string, nextAction *tgbotapi.EditMessageReplyMarkupConfig) {
 
 	// Default to clear the actions
-	nextAction = createNextAction(new, update.CallbackQuery, nil)
 	action, targetIDs := getActionInfo(update.CallbackQuery)
 
 	switch action {
+
+	/*
+		Register Action.
+		-------------
+		Next Action: empty
+	*/
+	case RegisterAction:
+
+		if user.IsRegistered() {
+			replyMessage = "You're already registered."
+			break
+		}
+
+		// Register user for the bot
+		newUser, err := usercollection.Create(update.CallbackQuery.From.UserName, update.CallbackQuery.From.ID)
+		if err == nil {
+			replyMessage = fmt.Sprintf("User [%s] registered 🔥", newUser.UserName)
+		} else {
+			replyMessage = fmt.Sprintf("Failed to register user [%s]", update.CallbackQuery.From.UserName)
+		}
+
 	/*
 		Save Action.
 		-------------
 		Next Action: Favourite Action, Unfavourite Action
 	*/
-	case Actions.Save.ID:
+	case SaveAction:
 		if !user.IsRegistered() {
 			replyMessage = "Register first to start collecting recipes."
 			break
@@ -110,39 +139,19 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 
 		if err == nil {
 			replyMessage = fmt.Sprintf("Recipe saved 😛")
-			nextAction = createNextAction(new, update.CallbackQuery, []Action{Actions.Favourite, Actions.Unfavourite}, recipe.ID.Hex())
 		} else {
 			replyMessage = fmt.Sprintf("Failed to save the recipe 😕")
 		}
-
-	/*
-		Register Action.
-		-------------
-		Next Action: empty
-	*/
-	case Actions.Register.ID:
-
-		if user.IsRegistered() {
-			replyMessage = "You're already registered."
-			break
-		}
-
-		// Register user for the bot
-		newUser, err := usercollection.Create(update.CallbackQuery.From.UserName, update.CallbackQuery.From.ID)
-		if err == nil {
-			replyMessage = fmt.Sprintf("User [%s] registered 🔥", newUser.UserName)
-		} else {
-			replyMessage = fmt.Sprintf("Failed to register user [%s]", update.CallbackQuery.From.UserName)
-		}
+		nextAction = getNextAction(action, err, update.CallbackQuery, recipe.ID.Hex())
 
 	/*
 		Favourite Action.
 		-------------
 		Next Action: no change
 	*/
-	case Actions.Favourite.ID:
+	case FavouriteAction:
 
-		nextAction = createNextAction(noChanges, update.CallbackQuery, nil)
+		nextAction = getNextAction(action, nil, update.CallbackQuery)
 
 		if !user.IsRegistered() {
 			replyMessage = "Register first to start adding favourites."
@@ -165,9 +174,9 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 		-------------
 		Next Action: no cahnge
 	*/
-	case Actions.Unfavourite.ID:
+	case UnfavouriteAction:
 
-		nextAction = createNextAction(noChanges, update.CallbackQuery, nil)
+		nextAction = getNextAction(action, nil, update.CallbackQuery)
 
 		if !user.IsRegistered() {
 			replyMessage = "Register first to start adding favourites."
@@ -190,23 +199,19 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 
 type nextActionType int
 
-const (
-	noChanges nextActionType = 1
-	new       nextActionType = 2
-)
-
 // Create next action keyboard by modifying the existing message
-func createNextAction(next nextActionType, callback *tgbotapi.CallbackQuery, actions []Action, otherIds ...string) *tgbotapi.EditMessageReplyMarkupConfig {
+func getNextAction(actionID int, err error, callback *tgbotapi.CallbackQuery, otherIds ...string) *tgbotapi.EditMessageReplyMarkupConfig {
 
-	// Return no changes
-	if next == noChanges {
+	action := registeredActions[actionID]
+	// Return no changes -> action remains visible
+	if action.persistOnClick || err != nil {
 		return nil
 	}
 
 	// Set the properties
 	nextAction := tgbotapi.EditMessageReplyMarkupConfig{
 		BaseEdit: tgbotapi.BaseEdit{
-			ReplyMarkup: AddActions(actions, otherIds...),
+			ReplyMarkup: AddActions(action.nextIDs, otherIds...),
 		},
 	}
 
@@ -221,8 +226,14 @@ func createNextAction(next nextActionType, callback *tgbotapi.CallbackQuery, act
 }
 
 // Get action info from the callbackQuery
-func getActionInfo(callbackQuery *tgbotapi.CallbackQuery) (actionID string, otherIDs []string) {
+func getActionInfo(callbackQuery *tgbotapi.CallbackQuery) (actionID int, otherIDs []string) {
 	// Actions template is <ActionId>,<otherId1>,<otherId2>
 	var actionParts = strings.Split(callbackQuery.Data, actionDelimeter)
-	return actionParts[actionIDPosition], actionParts[otherIDsPosotion:]
+	otherIDs = actionParts[otherIDsPosition:]
+	actionID, err := strconv.Atoi(actionParts[actionIDPosition])
+
+	if err != nil {
+		log.Println(err)
+	}
+	return
 }
