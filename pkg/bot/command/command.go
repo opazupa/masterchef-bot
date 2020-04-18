@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"masterchef_bot/pkg/bot/callback"
@@ -16,59 +17,64 @@ import (
 type command struct {
 	Key         string
 	Description string
+	NextActions []int
 }
 
-// List of Commands
-type list struct {
-	Help   command
-	Random command
-	Start  command
-	Top3   command
-}
+// commands
+const (
+	helpCommand   = "help"
+	randomCommand = "random"
+	startCommand  = "start"
+	top3Command   = "top3"
+)
 
-// Configured commands
-var commands = &list{
-	Help: command{
-		Key: "help",
+var registeredCommands map[string]command = map[string]command{
+	// Help command
+	helpCommand: {
+		Key: helpCommand,
 		Description: `
-How can I help you *Sir?*
-
-*Start* with /start command.
-
-*Random recipe* with /random command.
-
-*Top3 recipes* with /top3 command.
-
-*Recipe search*
-Search for recipes by calling
-''@%s'' and then by typing recipe.
-
-`,
+		How can I help you *Sir?*
+		
+		*Start* with /start command.
+		
+		*Random recipe* with /random command.
+		
+		*Top3 recipes* with /top3 command.
+		
+		*Recipe search*
+		Search for recipes by calling
+		''@%s'' and then by typing recipe.
+		`,
+		NextActions: nil,
 	},
-	Random: command{
-		Key:         "random",
-		Description: `*Here's the random recipe for you!* 👌`,
+	// Random command
+	randomCommand: {
+		Key:         randomCommand,
+		NextActions: []int{callback.FavouriteAction, callback.UnfavouriteAction},
 	},
-	Start: command{
-		Key: "start",
+	// Start command
+	startCommand: {
+		Key: startCommand,
 		Description: `
-*Hi*!
-
-I’m the *Masterchef* bot on your service!👌
-
-Register and start building
-your own masterchef recipe book. 👇
-*Let’s start cooking ay?* 🔥
-
-''''''
-By doing that you accept @%s
-to store your name and telegram id.
-''''''
-`,
+		*Hi*!
+		
+		I’m the *Masterchef* bot on your service!👌
+		
+		Register and start building
+		your own masterchef recipe book. 👇
+		*Let’s start cooking ay?* 🔥
+		
+		''''''
+		By doing that you accept @%s
+		to store your name and telegram id.
+		''''''
+		`,
+		NextActions: []int{callback.RegisterAction},
 	},
-	Top3: command{
-		Key:         "top3",
-		Description: "",
+	// Top3 command
+	top3Command: {
+		Key:         top3Command,
+		NextActions: []int{callback.FavouriteAction, callback.UnfavouriteAction},
 	},
 }
 
@@ -76,29 +82,35 @@ to store your name and telegram id.
 func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) (reply *[]tgbotapi.MessageConfig, err error) {
 
 	var messages []tgbotapi.MessageConfig
+	command, found := registeredCommands[update.Message.Command()]
 
-	switch update.Message.Command() {
+	if !found {
+		err = fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
+		log.Print(err)
+	}
+
+	switch command.Key {
 
 	/*
 		Help command
 		-------------
 		Next Action: nil
 	*/
-	case commands.Help.Key:
-		messages = append(messages, tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Help.Description, botName)))
+	case helpCommand:
+		messages = append(messages, command.messageFromDescription(update.Message.Chat.ID, botName))
 
 	/*
 		Random command
 		-------------
 		Next Action: Favourite action, Unfavourite action
 	*/
-	case commands.Random.Key:
+	case randomCommand:
 		// Get a random recipe
 		if recipes := *recipecollection.GetRandom(1); funk.Any(recipes) {
-			message := tgbotapi.NewMessage(update.Message.Chat.ID, funk.Head(recipes).(recipecollection.Recipe).ToMessage(commands.Random.Description))
+			message := tgbotapi.NewMessage(update.Message.Chat.ID, funk.Head(recipes).(recipecollection.Recipe).ToMessage())
 
 			// Add action
-			message.ReplyMarkup = callback.AddActions([]int{callback.FavouriteAction, callback.UnfavouriteAction}, funk.Head(recipes).(recipecollection.Recipe).ID.Hex())
+			message.ReplyMarkup = command.getNextAction(funk.Head(recipes).(recipecollection.Recipe).ID.Hex())
 			messages = append(messages, message)
 		} else {
 			err = fmt.Errorf("No recipes returned for the random one")
@@ -109,12 +121,12 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 		-------------
 		Next Action: Register action
 	*/
-	case commands.Start.Key:
-		message := tgbotapi.NewMessage(update.Message.Chat.ID, finalizedMarkdown(commands.Start.Description, botName))
+	case startCommand:
+		message := command.messageFromDescription(update.Message.Chat.ID, botName)
 
 		// Give option to register to new users
 		if user == nil {
-			message.ReplyMarkup = callback.AddActions([]int{callback.RegisterAction})
+			message.ReplyMarkup = command.getNextAction()
 		}
 
 		messages = append(messages, message)
@@ -124,13 +136,17 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 		-------------
 		Next Action: Favourite action, Unfavourite action
 	*/
-	case commands.Top3.Key:
+	case top3Command:
 		// TODO Olli get most popular recipes
-
-	default:
-		err = fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
+		topRecipes := recipecollection.GetMostFavourited(3)
+		funk.ForEach(*topRecipes, func(topRecipe recipecollection.Recipe) {
+			message := tgbotapi.NewMessage(update.Message.Chat.ID, topRecipe.ToMessage())
+			message.ReplyMarkup = command.getNextAction(topRecipe.ID.Hex())
+			messages = append(messages, message)
+		})
 	}
 
+	// Set markdown rendering
 	messages = funk.Map(messages, func(message tgbotapi.MessageConfig) tgbotapi.MessageConfig {
 		message.ParseMode = "Markdown"
 		return message
@@ -138,7 +154,13 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 	return &messages, err
 }
 
-// Finalize markdown with correct chars
-func finalizedMarkdown(markdown string, params ...interface{}) string {
-	return strings.ReplaceAll(fmt.Sprintf(markdown, params...), "''", "`")
+// Create message from command description
+func (command command) messageFromDescription(chatID int64, params ...interface{}) (message tgbotapi.MessageConfig) {
+	message = tgbotapi.NewMessage(chatID, strings.ReplaceAll(fmt.Sprintf(command.Description, params...), "''", "`"))
+	return
+}
+
+// Get next action for the command
+func (command command) getNextAction(otherIds ...string) *tgbotapi.InlineKeyboardMarkup {
+	return callback.AddActions(command.NextActions, otherIds...)
 }

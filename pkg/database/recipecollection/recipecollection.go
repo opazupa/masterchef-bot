@@ -26,7 +26,7 @@ const (
 )
 
 // ToMessage from recipe with given title
-func (recipe Recipe) ToMessage(header string) (message string) {
+func (recipe Recipe) ToMessage(header ...string) (message string) {
 	return fmt.Sprintf(templates.RecipeMessage, header, recipe.Name, recipe.URL)
 }
 
@@ -85,6 +85,27 @@ func GetByID(id primitive.ObjectID) (recipe *Recipe, err error) {
 
 // GetRandom recipes from collection
 func GetRandom(amount int) (recipes *[]Recipe) {
+
+	pipeline := []bson.M{{
+		"$sample": bson.M{
+			"size": amount,
+		},
+	}}
+
+	ctx := *database.Manager.GetContext()
+	cursor, err := database.Manager.Get(collection).Aggregate(ctx, pipeline)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	recipes = &[]Recipe{}
+	cursor.All(ctx, recipes)
+	return
+}
+
+// GetMostFavourited recipes from collection
+func GetMostFavourited(amount int) (recipes *[]Recipe) {
 
 	pipeline := []bson.M{{
 		"$sample": bson.M{

@@ -18,8 +18,8 @@ import (
 type action struct {
 	ID             int
 	Text           string
-	nextIDs        []int
-	persistOnClick bool
+	NextActions    []int
+	PersistOnClick bool
 }
 
 // Actions
@@ -35,27 +35,27 @@ var registeredActions map[int]action = map[int]action{
 	RegisterAction: {
 		ID:             RegisterAction,
 		Text:           "Hop on 👌",
-		nextIDs:        nil,
-		persistOnClick: false,
+		NextActions:    nil,
+		PersistOnClick: false,
 	},
 	// Save Action for save recipe buttons
 	SaveAction: {
 		ID:             SaveAction,
 		Text:           "Save 😛",
-		nextIDs:        []int{FavouriteAction, UnfavouriteAction},
-		persistOnClick: false,
+		NextActions:    []int{FavouriteAction, UnfavouriteAction},
+		PersistOnClick: false,
 	},
 	// Favourite Action for collecting fav recipes
 	FavouriteAction: {
 		ID:             FavouriteAction,
 		Text:           "Favourite 👍",
-		persistOnClick: true,
+		PersistOnClick: true,
 	},
 	// Unfavourite Action for cleaning fav recipes
 	UnfavouriteAction: {
 		ID:             UnfavouriteAction,
 		Text:           "Unfavourite ❌",
-		persistOnClick: true,
+		PersistOnClick: true,
 	},
 }
 
@@ -204,14 +204,14 @@ func getNextAction(actionID int, err error, callback *tgbotapi.CallbackQuery, ot
 
 	action := registeredActions[actionID]
 	// Return no changes -> action remains visible
-	if action.persistOnClick || err != nil {
+	if action.PersistOnClick || err != nil {
 		return nil
 	}
 
 	// Set the properties
 	nextAction := tgbotapi.EditMessageReplyMarkupConfig{
 		BaseEdit: tgbotapi.BaseEdit{
-			ReplyMarkup: AddActions(action.nextIDs, otherIds...),
+			ReplyMarkup: AddActions(action.NextActions, otherIds...),
 		},
 	}
 
