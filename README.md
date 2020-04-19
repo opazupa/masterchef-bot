@@ -13,17 +13,16 @@ I'm a **`MasterChefBot`** and ready to help you in the kitchen!
 - Get most popular recipes
 
 
-
 ## Development
 
 ### Start up :rocket:
 
 Configuration
 ```
-API_KEY:                 "<your-bot-api-key>"
-    DEBUG_MODE:          true/false
-    DATABASE_CONNECTION: "mongo_connection"
-	DATABASE_NAME:       "your_db"  
+API_KEY:                "<your-bot-api-key>"
+DEBUG_MODE:             true/false
+DATABASE_CONNECTION:    "mongo_connection"
+DATABASE_NAME:          "your_db"  
 ```
 
 ### Running locally
