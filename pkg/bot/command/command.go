@@ -33,17 +33,17 @@ var registeredCommands map[string]command = map[string]command{
 	helpCommand: {
 		Key: helpCommand,
 		Description: `
-		How can I help you *Sir?*
-		
-		*Start* with /start command.
-		
-		*Random recipe* with /random command.
-		
-		*Top3 recipes* with /top3 command.
-		
-		*Recipe search*
-		Search for recipes by calling
-		''@%s'' and then by typing recipe.
+How can I help you *Sir?*
+
+*Start* with /start command.
+
+*Random recipe* with /random command.
+
+*Top3 recipes* with /top3 command.
+
+*Recipe search*
+Search for recipes by calling
+''@%s'' and then by typing recipe.
 		`,
 		NextActions: nil,
 	},
@@ -56,24 +56,30 @@ var registeredCommands map[string]command = map[string]command{
 	startCommand: {
 		Key: startCommand,
 		Description: `
-		*Hi*!
-		
-		I’m the *Masterchef* bot on your service!👌
-		
-		Register and start building
-		your own masterchef recipe book. 👇
-		*Let’s start cooking ay?* 🔥
-		
-		''''''
-		By doing that you accept @%s
-		to store your name and telegram id.
-		''''''
+*Hi*!
+
+I’m the *Masterchef* bot on your service!👌
+
+Register and start building
+your own masterchef recipe book. 👇
+*Let’s start cooking ay?* 🔥
+
+''''''
+By doing that you accept @%s
+to store your name and telegram id.
+''''''
 		`,
 		NextActions: []int{callback.RegisterAction},
 	},
 	// Top3 command
 	top3Command: {
-		Key:         top3Command,
+		Key: top3Command,
+		Description: `
+''Boom! 💥''
+
+Break a leg with the next *TOP3* recipes! 👇
+
+		`,
 		NextActions: []int{callback.FavouriteAction, callback.UnfavouriteAction},
 	},
 }
@@ -137,13 +143,20 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 		Next Action: Favourite action, Unfavourite action
 	*/
 	case top3Command:
-		// TODO Olli get most popular recipes
+		// Get the most popular recipes
 		topRecipes := recipecollection.GetMostFavourited(3)
-		funk.ForEach(*topRecipes, func(topRecipe recipecollection.Recipe) {
-			message := tgbotapi.NewMessage(update.Message.Chat.ID, topRecipe.ToMessage())
-			message.ReplyMarkup = command.getNextAction(topRecipe.ID.Hex())
-			messages = append(messages, message)
-		})
+
+		if funk.Any(topRecipes) {
+			// Add header message
+			messages = append(messages, command.messageFromDescription(update.Message.Chat.ID))
+
+			// Add favourite recipes
+			funk.ForEach(*topRecipes, func(favourite recipecollection.FavouriteRecipe) {
+				message := tgbotapi.NewMessage(update.Message.Chat.ID, favourite.ToMessage())
+				message.ReplyMarkup = command.getNextAction(favourite.ID.Hex())
+				messages = append(messages, message)
+			})
+		}
 	}
 
 	// Set markdown rendering
@@ -151,6 +164,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 		message.ParseMode = "Markdown"
 		return message
 	}).([]tgbotapi.MessageConfig)
+
 	return &messages, err
 }
 

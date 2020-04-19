@@ -21,9 +21,11 @@ type Recipe struct {
 	Added  time.Time          `bson:"Added"`
 }
 
-const (
-	collection = "recipes"
-)
+// FavouriteRecipe extending the Recipe
+type FavouriteRecipe struct {
+	Recipe     `bson:",inline"`
+	Favourited int `bson:"Favourited"`
+}
 
 // ToMessage from recipe with given title
 func (recipe Recipe) ToMessage(header ...string) (message string) {
@@ -39,7 +41,7 @@ func Add(recipe *selectedrecipecollection.SelectedRecipe) (addedRecipe *Recipe, 
 		"Added":  time.Now(),
 	}
 
-	inserted, err := database.Manager.Get(collection).InsertOne(*database.Manager.GetContext(), newRecipe)
+	inserted, err := database.Manager.Get(database.Recipes).InsertOne(*database.Manager.GetContext(), newRecipe)
 	if err != nil {
 		log.Print(err)
 		return
@@ -56,7 +58,7 @@ func GetByUser(userID primitive.ObjectID) (recipes *[]Recipe) {
 	}
 
 	ctx := *database.Manager.GetContext()
-	cursor, err := database.Manager.Get(collection).Find(ctx, filter)
+	cursor, err := database.Manager.Get(database.Recipes).Find(ctx, filter)
 	if err != nil {
 		log.Print(err)
 		return
@@ -75,7 +77,7 @@ func GetByID(id primitive.ObjectID) (recipe *Recipe, err error) {
 		"_id": id,
 	}
 
-	err = database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(recipe)
+	err = database.Manager.Get(database.Recipes).FindOne(*database.Manager.GetContext(), filter).Decode(recipe)
 	if err != nil {
 		log.Print(err)
 		recipe = nil
@@ -93,7 +95,7 @@ func GetRandom(amount int) (recipes *[]Recipe) {
 	}}
 
 	ctx := *database.Manager.GetContext()
-	cursor, err := database.Manager.Get(collection).Aggregate(ctx, pipeline)
+	cursor, err := database.Manager.Get(database.Recipes).Aggregate(ctx, pipeline)
 	if err != nil {
 		log.Print(err)
 		return
@@ -105,22 +107,40 @@ func GetRandom(amount int) (recipes *[]Recipe) {
 }
 
 // GetMostFavourited recipes from collection
-func GetMostFavourited(amount int) (recipes *[]Recipe) {
+func GetMostFavourited(amount int) (recipes *[]FavouriteRecipe) {
 
-	pipeline := []bson.M{{
-		"$sample": bson.M{
-			"size": amount,
+	pipeline := []bson.M{
+		{
+			"$lookup": bson.M{
+				"from":         database.Users,
+				"localField":   "_id",
+				"foreignField": "Favourites.RecipeID",
+				"as":           "Favourited",
+			},
 		},
-	}}
+		{
+			"$addFields": bson.M{
+				"Favourited": bson.M{
+					"$size": "$Favourited",
+				},
+			},
+		},
+		{
+			"$sort": bson.M{
+				"Favourited": -1,
+			},
+		},
+		{"$limit": amount},
+	}
 
 	ctx := *database.Manager.GetContext()
-	cursor, err := database.Manager.Get(collection).Aggregate(ctx, pipeline)
+	cursor, err := database.Manager.Get(database.Recipes).Aggregate(ctx, pipeline)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	recipes = &[]Recipe{}
+	recipes = &[]FavouriteRecipe{}
 	cursor.All(ctx, recipes)
 	return
 }

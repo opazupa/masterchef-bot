@@ -20,8 +20,6 @@ type SelectedRecipe struct {
 	Selected time.Time          `bson:"Selected"`
 }
 
-const collection = "selectedrecipes"
-
 // Save new selection for user in a given chat
 func Save(name string, url string, chatID int64, userID primitive.ObjectID) (err error) {
 
@@ -42,7 +40,7 @@ func Save(name string, url string, chatID int64, userID primitive.ObjectID) (err
 		Upsert: &upsert,
 	}
 	// Try to update if the exsiting user and chat is found
-	res := database.Manager.Get(collection).FindOneAndUpdate(*database.Manager.GetContext(), userFilter, update, &opt)
+	res := database.Manager.Get(database.SelectedRecipes).FindOneAndUpdate(*database.Manager.GetContext(), userFilter, update, &opt)
 	if err = res.Err(); err != nil {
 		log.Print(res.Err())
 	}
@@ -63,7 +61,7 @@ func GetByUser(userID primitive.ObjectID) (recipe *SelectedRecipe) {
 		"Selected": -1,
 	})
 
-	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter, opt).Decode(recipe)
+	err := database.Manager.Get(database.SelectedRecipes).FindOne(*database.Manager.GetContext(), filter, opt).Decode(recipe)
 	if err != nil {
 		log.Print(err)
 		recipe = nil

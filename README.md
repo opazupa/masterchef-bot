@@ -10,6 +10,7 @@ I'm a **`MasterChefBot`** and ready to help you in the kitchen!
     - Add your own ones
     - Favourite others
 - Get random recipe
+- Get most popular recipes
 
 
 

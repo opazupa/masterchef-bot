@@ -9,8 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Favourite
-type favourite struct {
+// Favourite elem
+type Favourite struct {
 	RecipeID primitive.ObjectID `bson:"RecipeID"`
 }
 
@@ -20,10 +20,8 @@ type User struct {
 	UserName   string             `bson:"UserName"`
 	TelegramID int                `bson:"TelegramID"`
 	Registered time.Time          `bson:"Registered"`
-	Favourites []favourite        `bson:"Favourites"`
+	Favourites []Favourite        `bson:"Favourites"`
 }
-
-const collection = "users"
 
 // Create new user
 func Create(userName string, id int) (user *User, err error) {
@@ -31,10 +29,10 @@ func Create(userName string, id int) (user *User, err error) {
 		"UserName":   userName,
 		"TelegramId": id,
 		"Registered": time.Now(),
-		"Favourites": []favourite{},
+		"Favourites": []Favourite{},
 	}
 
-	inserted, err := database.Manager.Get(collection).InsertOne(*database.Manager.GetContext(), newUser)
+	inserted, err := database.Manager.Get(database.Users).InsertOne(*database.Manager.GetContext(), newUser)
 	if err != nil {
 		return
 	}
@@ -49,7 +47,7 @@ func getByID(id primitive.ObjectID) (user *User, err error) {
 	filter := bson.M{
 		"_id": id,
 	}
-	err = database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(user)
+	err = database.Manager.Get(database.Users).FindOne(*database.Manager.GetContext(), filter).Decode(user)
 	if err != nil {
 		log.Print(err)
 		user = nil
@@ -69,7 +67,7 @@ func GetByUserName(userName *string) (user *User) {
 		"UserName": userName,
 	}
 
-	err := database.Manager.Get(collection).FindOne(*database.Manager.GetContext(), filter).Decode(user)
+	err := database.Manager.Get(database.Users).FindOne(*database.Manager.GetContext(), filter).Decode(user)
 	if err != nil {
 		log.Print(err)
 		user = nil
@@ -93,14 +91,14 @@ func (user *User) AddFavourite(recipeID string) (added bool, err error) {
 	// Add the new recipe to the collection if not existing
 	update := bson.M{
 		"$addToSet": bson.M{
-			"Favourites": favourite{
+			"Favourites": Favourite{
 				RecipeID: objID,
 			},
 		},
 	}
 
 	// Try to update if the exsiting user
-	opts, err := database.Manager.Get(collection).UpdateOne(*database.Manager.GetContext(), userFilter, update)
+	opts, err := database.Manager.Get(database.Users).UpdateOne(*database.Manager.GetContext(), userFilter, update)
 	if err != nil {
 		log.Print(err)
 	}
@@ -131,7 +129,7 @@ func (user *User) RemoveFavourite(recipeID string) (removed bool, err error) {
 	}
 
 	// Try to update if the exsiting user
-	opts, err := database.Manager.Get(collection).UpdateOne(*database.Manager.GetContext(), userFilter, update)
+	opts, err := database.Manager.Get(database.Users).UpdateOne(*database.Manager.GetContext(), userFilter, update)
 	if err != nil {
 		log.Print(err)
 	}
@@ -139,7 +137,7 @@ func (user *User) RemoveFavourite(recipeID string) (removed bool, err error) {
 	return
 }
 
-// IsRegistered
+// IsRegistered to app
 func (user *User) IsRegistered() bool {
 	return user != nil
 }

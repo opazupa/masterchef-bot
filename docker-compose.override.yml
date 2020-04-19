@@ -27,6 +27,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: master
       MONGO_INITDB_ROOT_PASSWORD: chef
       MONGO_INITDB_DATABASE: "${DATABASE_NAME}"
+    ports: 
+      - '27018:27017'
     volumes:
       - mongostore:/data/db
       - ./mongo_db:/docker-entrypoint-initdb.d
