@@ -113,10 +113,10 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 	case randomCommand:
 		// Get a random recipe
 		if recipes := *recipecollection.GetRandom(1); funk.Any(recipes) {
-			message := tgbotapi.NewMessage(update.Message.Chat.ID, funk.Head(recipes).(recipecollection.Recipe).ToMessage())
+			message := tgbotapi.NewMessage(update.Message.Chat.ID, funk.Head(recipes).(recipecollection.FavouriteRecipe).ToMessage())
 
 			// Add action
-			message.ReplyMarkup = command.getNextAction(funk.Head(recipes).(recipecollection.Recipe).ID.Hex())
+			message.ReplyMarkup = command.getNextAction(funk.Head(recipes).(recipecollection.FavouriteRecipe).ID.Hex())
 			messages = append(messages, message)
 		} else {
 			err = fmt.Errorf("No recipes returned for the random one")

@@ -32,6 +32,11 @@ func (recipe Recipe) ToMessage(header ...string) (message string) {
 	return fmt.Sprintf(templates.RecipeMessage, header, recipe.Name, recipe.URL)
 }
 
+// ToMessage from favourite recipe with given title
+func (recipe FavouriteRecipe) ToMessage(header ...string) (message string) {
+	return fmt.Sprintf(templates.FavouriteRecipeMessage, header, recipe.Name, recipe.URL, recipe.Favourited)
+}
+
 // Add new recipe
 func Add(recipe *selectedrecipecollection.SelectedRecipe) (addedRecipe *Recipe, err error) {
 	newRecipe := bson.M{
@@ -86,13 +91,30 @@ func GetByID(id primitive.ObjectID) (recipe *Recipe, err error) {
 }
 
 // GetRandom recipes from collection
-func GetRandom(amount int) (recipes *[]Recipe) {
+func GetRandom(amount int) (recipes *[]FavouriteRecipe) {
 
-	pipeline := []bson.M{{
-		"$sample": bson.M{
-			"size": amount,
+	pipeline := []bson.M{
+		{
+			"$lookup": bson.M{
+				"from":         database.Users,
+				"localField":   "_id",
+				"foreignField": "Favourites.RecipeID",
+				"as":           "Favourited",
+			},
 		},
-	}}
+		{
+			"$addFields": bson.M{
+				"Favourited": bson.M{
+					"$size": "$Favourited",
+				},
+			},
+		},
+		{
+			"$sample": bson.M{
+				"size": amount,
+			},
+		},
+	}
 
 	ctx := *database.Manager.GetContext()
 	cursor, err := database.Manager.Get(database.Recipes).Aggregate(ctx, pipeline)
@@ -101,7 +123,7 @@ func GetRandom(amount int) (recipes *[]Recipe) {
 		return
 	}
 
-	recipes = &[]Recipe{}
+	recipes = &[]FavouriteRecipe{}
 	cursor.All(ctx, recipes)
 	return
 }
