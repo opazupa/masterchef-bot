@@ -1,38 +1,48 @@
-# Masterchef Telegram Bot :fire:
+# Masterchef Telegram Bot and Recipe Collection :fire:
 
-Hi!
+This is the repository for the **Masterchef bot** features.
 
-I'm a **`MasterChefBot`** and ready to help you in the kitchen!
+## Features
 
-## Get it cooking :pizza:
-- Search recipes
-- Sign up and collect recipes
-    - Add your own ones
-    - Favourite others
-- Get random recipe
-- Get most popular recipes
-
+| Component | *path* |
+| --- | --- |
+| Telegram bot          | [`/bot`](./bot/README.md)   |
+| Exrpess GraphQL API   | [`/api`](./api/README.md)   |   
+| Mongo DB              | [`/mongo_db`](./mongo_db/)  |
 
 ## Development
 
 ### Start up :rocket:
 
-Configuration
+Add configurations with `.env` file by taking a look from [`.example.env`](./.example.env) and [configurations](##Configuration).
+
+### Running with Make
+
+`Build`
+
 ```
-API_KEY:                "<your-bot-api-key>"
-DEBUG_MODE:             true/false
-DATABASE_CONNECTION:    "mongo_connection"
-DATABASE_NAME:          "your_db"  
+make build
 ```
 
-### Running locally
 `Hot reload`
 ```
-docker-compose up
-docker-compose down
+// Loads configuration from .env file
+make run-dev
+make stop-dev
 ```
 `Production`
 ```
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
+// Requires env variables apart from .env file
+make run
+make stop
 ```
+
+
+## Configuration
+| Key | Value |
+| --- | --- |
+| `API_KEY`             | <your_bot_api_key> from Telegram                   |
+| `DEBUG_MODE`          | true/false to enable detailed logging              |
+| `DATABASE_CONNECTION` | <your_mongo_connection> to connect to mongo server |
+| `DATABASE_NAME`       | <your_db_name> to use in mongo server              | 
+

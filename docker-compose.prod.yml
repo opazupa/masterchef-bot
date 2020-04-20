@@ -4,9 +4,6 @@ services:
 
   masterchef-bot:
     restart: always
-    build:
-      context: .
-      dockerfile: ./Dockerfile
 
     environment:
       API_KEY: "${API_KEY}"
