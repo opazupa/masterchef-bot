@@ -22,10 +22,12 @@ type command struct {
 
 // commands
 const (
-	helpCommand   = "help"
-	randomCommand = "random"
-	startCommand  = "start"
-	top3Command   = "top3"
+	helpCommand         = "help"
+	randomCommand       = "random"
+	startCommand        = "start"
+	top3Command         = "top3"
+	myFavouritesCommand = "myfavourites"
+	myRecipesCommand    = "myrecipes"
 )
 
 var registeredCommands map[string]command = map[string]command{
@@ -82,12 +84,33 @@ Break a leg with the next *TOP3* recipes! 👇
 		`,
 		NextActions: []int{callback.FavouriteAction, callback.UnfavouriteAction},
 	},
+	// MyRecipes command
+	myFavouritesCommand: {
+		Key: myFavouritesCommand,
+		Description: `
+''Here you go 💁‍♀️''
+
+*%s's* favourites ⭐️:
+		`,
+		NextActions: []int{callback.FavouriteAction, callback.UnfavouriteAction},
+	},
+	// MyRecipes command
+	myRecipesCommand: {
+		Key: myRecipesCommand,
+		Description: `
+''Here you go 💁‍♀️''
+
+*%s's* recipes 🥘:
+		`,
+		NextActions: []int{callback.FavouriteAction, callback.UnfavouriteAction},
+	},
 }
 
 // Handle command for bot
 func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) (reply *[]tgbotapi.MessageConfig, err error) {
 
 	var messages []tgbotapi.MessageConfig
+	chatID := update.Message.Chat.ID
 	command, found := registeredCommands[update.Message.Command()]
 
 	if !found {
@@ -103,7 +126,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 		Next Action: nil
 	*/
 	case helpCommand:
-		messages = append(messages, command.messageFromDescription(update.Message.Chat.ID, botName))
+		messages = append(messages, command.messageFromDescription(chatID, botName))
 
 	/*
 		Random command
@@ -113,7 +136,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 	case randomCommand:
 		// Get a random recipe
 		if recipes := *recipecollection.GetRandom(1); funk.Any(recipes) {
-			message := tgbotapi.NewMessage(update.Message.Chat.ID, funk.Head(recipes).(recipecollection.FavouriteRecipe).ToMessage())
+			message := tgbotapi.NewMessage(chatID, funk.Head(recipes).(recipecollection.FavouriteRecipe).ToMessage())
 
 			// Add action
 			message.ReplyMarkup = command.getNextAction(funk.Head(recipes).(recipecollection.FavouriteRecipe).ID.Hex())
@@ -128,7 +151,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 		Next Action: Register action
 	*/
 	case startCommand:
-		message := command.messageFromDescription(update.Message.Chat.ID, botName)
+		message := command.messageFromDescription(chatID, botName)
 
 		// Give option to register to new users
 		if user == nil {
@@ -148,12 +171,62 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 
 		if funk.Any(topRecipes) {
 			// Add header message
-			messages = append(messages, command.messageFromDescription(update.Message.Chat.ID))
+			messages = append(messages, command.messageFromDescription(chatID))
 
 			// Add favourite recipes
 			funk.ForEach(*topRecipes, func(favourite recipecollection.FavouriteRecipe) {
-				message := tgbotapi.NewMessage(update.Message.Chat.ID, favourite.ToMessage())
+				message := tgbotapi.NewMessage(chatID, favourite.ToMessage())
 				message.ReplyMarkup = command.getNextAction(favourite.ID.Hex())
+				messages = append(messages, message)
+			})
+		}
+
+	/*
+		MyFavourites command
+		-------------
+		Next Action: Favourite action, Unfavourite action
+	*/
+	case myFavouritesCommand:
+
+		if user == nil {
+			break
+		}
+
+		// Get user favourite recipes
+		favouriteRecipes := recipecollection.GetFavouritesByUser(user.ID)
+		log.Print(len(*favouriteRecipes))
+		if funk.Any(favouriteRecipes) {
+			// Add header message
+			messages = append(messages, command.messageFromDescription(chatID, user.UserName))
+
+			// Add user favourite recipes
+			funk.ForEach(*favouriteRecipes, func(favourite recipecollection.FavouriteRecipe) {
+				message := tgbotapi.NewMessage(chatID, favourite.ToMessage())
+				message.ReplyMarkup = command.getNextAction(favourite.ID.Hex())
+				messages = append(messages, message)
+			})
+		}
+	/*
+		MyRecipes command
+		-------------
+		Next Action: Favourite action, Unfavourite action
+	*/
+	case myRecipesCommand:
+
+		if user == nil {
+			break
+		}
+
+		// Get user recipes
+		userRecipes := recipecollection.GetByUser(user.ID)
+		if funk.Any(userRecipes) {
+			// Add header message
+			messages = append(messages, command.messageFromDescription(chatID, user.UserName))
+
+			// Add users recipes
+			funk.ForEach(*userRecipes, func(recipe recipecollection.FavouriteRecipe) {
+				message := tgbotapi.NewMessage(chatID, recipe.ToMessage())
+				message.ReplyMarkup = command.getNextAction(recipe.ID.Hex())
 				messages = append(messages, message)
 			})
 		}

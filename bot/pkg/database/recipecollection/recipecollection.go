@@ -56,20 +56,87 @@ func Add(recipe *selectedrecipecollection.SelectedRecipe) (addedRecipe *Recipe, 
 }
 
 // GetByUser from collection
-func GetByUser(userID primitive.ObjectID) (recipes *[]Recipe) {
+func GetByUser(userID primitive.ObjectID) (recipes *[]FavouriteRecipe) {
 
-	filter := bson.M{
-		"UserID": userID,
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{
+				"UserID": userID,
+			},
+		},
+		{
+			"$lookup": bson.M{
+				"from":         database.Users,
+				"localField":   "_id",
+				"foreignField": "Favourites.RecipeID",
+				"as":           "Favourited",
+			},
+		},
+		{
+			"$addFields": bson.M{
+				"Favourited": bson.M{
+					"$size": "$Favourited",
+				},
+			},
+		},
+		{
+			"$sort": bson.M{
+				"Name": 1,
+			},
+		},
 	}
 
 	ctx := *database.Manager.GetContext()
-	cursor, err := database.Manager.Get(database.Recipes).Find(ctx, filter)
+	cursor, err := database.Manager.Get(database.Recipes).Aggregate(ctx, pipeline)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	recipes = &[]Recipe{}
+	recipes = &[]FavouriteRecipe{}
+	cursor.All(ctx, recipes)
+	return
+}
+
+// GetFavouritesByUser from collection
+func GetFavouritesByUser(userID primitive.ObjectID) (recipes *[]FavouriteRecipe) {
+
+	pipeline := []bson.M{
+		{
+			"$lookup": bson.M{
+				"from":         database.Users,
+				"localField":   "_id",
+				"foreignField": "Favourites.RecipeID",
+				"as":           "FavouritedBy",
+			},
+		},
+		{
+			"$match": bson.M{
+				"FavouritedBy._id": userID,
+			},
+		},
+		{
+			"$addFields": bson.M{
+				"Favourited": bson.M{
+					"$size": "$FavouritedBy",
+				},
+			},
+		},
+		{
+			"$sort": bson.M{
+				"Name": 1,
+			},
+		},
+	}
+
+	ctx := *database.Manager.GetContext()
+	cursor, err := database.Manager.Get(database.Recipes).Aggregate(ctx, pipeline)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	recipes = &[]FavouriteRecipe{}
 	cursor.All(ctx, recipes)
 	return
 }
