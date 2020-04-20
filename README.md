@@ -6,8 +6,8 @@ This is the repository for the **Masterchef bot** features.
 
 | Component | *path* |
 | --- | --- |
-| Telegram bot          | [`/bot`](./bot/README.md)   |
-| Exrpess GraphQL API   | [`/api`](./api/README.md)   |   
+| Telegram bot          | [`/bot`](./bot/)            |
+| Exrpess GraphQL API   | [`/api`](./api/)            |   
 | Mongo DB              | [`/mongo_db`](./mongo_db/)  |
 
 ## Development
