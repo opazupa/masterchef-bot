@@ -16,7 +16,7 @@ type Configuration struct {
 // Get configuration
 func Get() *Configuration {
 	return &Configuration{
-		APIKey:             getEnv("API_KEY", ""),
+		APIKey:             getEnv("BOT_API_KEY", ""),
 		DebugMode:          getEnvAsBool("DEBUG_MODE", false),
 		DatabaseConnection: getEnv("DATABASE_CONNECTION", ""),
 		DatabaseName:       getEnv("DATABASE_NAME", " "),

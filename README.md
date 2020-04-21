@@ -10,13 +10,13 @@ This is the repository for the **Masterchef bot** features.
 | Exrpess GraphQL API   | [`/api`](./api/)            |   
 | Mongo DB              | [`/mongo_db`](./mongo_db/)  |
 
-## Development
+## Development 🚨
 
 ### Start up :rocket:
 
 Add configurations with `.env` file by taking a look from [`.example.env`](./.example.env) and [configurations](##Configuration).
 
-### Running with Make
+### Running with Make 😽
 
 `Build`
 
@@ -39,11 +39,11 @@ make down
 ```
 
 
-## Configuration
+## Configuration 🔧
 | Key | Value |
 | --- | --- |
-| `API_KEY`             | <your_bot_api_key> from Telegram                   |
-| `DEBUG_MODE`          | true/false to enable detailed logging              |
+| `BOT_API_KEY`         | <your_bot_api_key> from Telegram                   |
+| `DEBUG_MODE`          | true/false to enable detailed logging etc.         |
 | `DATABASE_CONNECTION` | <your_mongo_connection> to connect to mongo server |
 | `DATABASE_NAME`       | <your_db_name> to use in mongo server              | 
 

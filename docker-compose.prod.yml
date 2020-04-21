@@ -6,7 +6,7 @@ services:
     restart: always
 
     environment:
-      API_KEY: "${API_KEY}"
+      BOT_API_KEY: "${BOT_API_KEY}"
       DEBUG_MODE: "${DEBUG_MODE}"
       DATABASE_NAME: "${DATABASE_NAME}"
       DATABASE_CONNECTION: "${DATABASE_CONNECTION}"
