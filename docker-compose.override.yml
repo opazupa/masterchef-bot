@@ -18,6 +18,25 @@ services:
     depends_on:
       - mongo
 
+  # Graphql API with express
+  graphql-api:
+    restart: always
+    image: node:10.15.0
+
+    volumes:
+      - './api:/usr/src/app'
+    working_dir: /usr/src/app
+    command: bash -c "npm install && npm run start:dev"
+
+    ports: 
+      - '${API_PORT}:${API_PORT}'
+      
+    env_file:
+      - ./.env
+
+    depends_on:
+      - mongo
+
   # Mongo
   mongo:
     container_name: mongo

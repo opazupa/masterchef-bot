@@ -5,12 +5,13 @@ import express from 'express';
 import helmet from 'helmet';
 import { createServer } from 'http';
 
-const port = process.env.PORT || 3000;
+dotenv.config();
+
+const port = process.env.API_PORT || 3000;
 const app = express();
 
-dotenv.config({ debug: process.env.DEBUG_MODE === 'true' });
-
 app.use(helmet());
+app.disable('x-powered-by');
 app.use('*', cors());
 app.use(compression());
 

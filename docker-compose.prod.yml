@@ -2,12 +2,34 @@ version: '3.4'
 
 services:
 
+  # Telegram bot
   masterchef-bot:
     restart: always
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
 
     environment:
       BOT_API_KEY: "${BOT_API_KEY}"
       DEBUG_MODE: "${DEBUG_MODE}"
       DATABASE_NAME: "${DATABASE_NAME}"
       DATABASE_CONNECTION: "${DATABASE_CONNECTION}"
+    
+    networks: 
+      - bot
+  
+  # GraphQL express api
+  graphql-api:
+    restart: always
+    build:
+      context: ./api
+      dockerfile: Dockerfile
 
+    ports: 
+      - '${API_PORT}:3000'
+    networks: 
+      - api
+
+networks: 
+  api:
+  bot:

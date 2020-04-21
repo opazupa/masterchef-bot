@@ -1,8 +1,11 @@
 version: '3.4'
 
 services:
+
+  # Telegram bot
   masterchef-bot:
     container_name: bot
-    build:
-      context: ./bot
-      dockerfile: Dockerfile
+ 
+  # GraphQL express api
+  graphql-api:
+    container_name: graphql-api
