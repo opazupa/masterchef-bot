@@ -13,6 +13,10 @@
 
 # Build output
 **/bin/
+
 # Env files
 .env
+
+#VS Code
+**/.vscode/
 
