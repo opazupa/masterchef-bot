@@ -42,6 +42,7 @@ make down
 ## Configuration 🔧
 | Key | Value |
 | --- | --- |
+| `API_PORT`            | <port_number> for server to run on                 |
 | `BOT_API_KEY`         | <your_bot_api_key> from Telegram                   |
 | `DEBUG_MODE`          | true/false to enable detailed logging etc.         |
 | `DATABASE_CONNECTION` | <your_mongo_connection> to connect to mongo server |

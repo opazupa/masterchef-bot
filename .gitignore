@@ -13,10 +13,12 @@
 
 # Build output
 **/bin/
+**/node_modules/
 
 # Env files
 .env
 
 #VS Code
 **/.vscode/
+
 
