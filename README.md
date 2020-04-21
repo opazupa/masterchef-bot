@@ -22,19 +22,20 @@ Add configurations with `.env` file by taking a look from [`.example.env`](./.ex
 
 ```
 make build
+make dev-build
 ```
-
-`Hot reload`
+Run with `Hot reload`
 ```
 // Loads configuration from .env file
-make run-dev
-make stop-dev
+make dev-up
+make dev-down
+make dev-clean
 ```
-`Production`
+Run in `Production`
 ```
 // Requires env variables apart from .env file
-make run
-make stop
+make up
+make down
 ```
 
 

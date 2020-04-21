@@ -37,11 +37,15 @@ var registeredCommands map[string]command = map[string]command{
 		Description: `
 How can I help you *Sir?*
 
-*Start* with /start command.
+*Start* with /` + startCommand + ` command.
 
-*Random recipe* with /random command.
+*Your recipes* with /` + myRecipesCommand + ` command.
 
-*Top3 recipes* with /top3 command.
+*Your favourites* with /` + myFavouritesCommand + ` command.
+
+*Random recipe* with /` + randomCommand + ` command.
+
+*Top3 recipes* with /` + top3Command + ` command.
 
 *Recipe search*
 Search for recipes by calling
