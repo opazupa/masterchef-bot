@@ -1,6 +1,17 @@
+"""
+User type
+"""
 type User {
+
+    """User ID"""
     ID: ID!
+
+    """UserName"""
     UserName: String!
+
+    """Registered timestamp"""
     Registered: Date!
+
+    """Favourite recipes"""
     Favourites: [Recipe]
 }

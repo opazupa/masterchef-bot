@@ -1,7 +1,23 @@
+"""
+Recipe type
+"""
 type Recipe {
-    """"""
+    
+    """Recipe ID"""
     ID: ID!
+
+    """User ID who added the recipe"""
     UserID: ID!
+
+    """Recipe Name"""
+    Name: String!
+
+    """Recipe Url"""
+    Url: String!
+
+    """Added timestamp"""
     Added: Date!
-    Favourites: [Recipe]
+
+    """Favourited by"""
+    Favourited: [User]
 }
