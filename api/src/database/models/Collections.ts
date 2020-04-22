@@ -2,8 +2,8 @@
  *   Constants for mongo collections
  */
 
-export const RecipeCollection = 'recipes';
-export const UserCollection = 'users';
+export const RECIPE_COLLECTION = 'recipes';
+export const USER_COLLECTION = 'users';
 
-export const RecipeModel = 'Recipe';
-export const UserModel = 'User';
+export const RECIPE = 'Recipe';
+export const USER = 'User';

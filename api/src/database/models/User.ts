@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-import { RecipeModel, UserCollection, UserModel } from './collections';
+import { RECIPE, USER, USER_COLLECTION } from './collections';
 
 /**
  * IUser document
@@ -16,15 +16,15 @@ export interface IUser extends Document {
   Favourites: { RecipeID: any }[];
 }
 
-const UserSchema: Schema = new Schema({
+const userSchema: Schema = new Schema({
   TelegramID: { type: Schema.Types.Number, required: true },
   UserName: { type: Schema.Types.String, required: true },
   Registered: { type: Schema.Types.Date, required: true, default: Date.now },
   Favourites: [
     new Schema({
-      RecipeID: { type: Schema.Types.ObjectId, ref: RecipeModel }
+      RecipeID: { type: Schema.Types.ObjectId, ref: RECIPE }
     })
   ]
 });
 
-export default mongoose.model<IUser>(UserModel, UserSchema, UserCollection);
+export default mongoose.model<IUser>(USER, userSchema, USER_COLLECTION);

@@ -1,0 +1,6 @@
+type User {
+    ID: ID!
+    UserName: String!
+    Registered: Date!
+    Favourites: [Recipe]
+}

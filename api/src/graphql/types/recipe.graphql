@@ -1,0 +1,7 @@
+type Recipe {
+    """"""
+    ID: ID!
+    UserID: ID!
+    Added: Date!
+    Favourites: [Recipe]
+}

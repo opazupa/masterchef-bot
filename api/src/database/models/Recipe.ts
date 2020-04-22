@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-import { RecipeCollection, RecipeModel, UserModel } from './collections';
+import { RECIPE, RECIPE_COLLECTION, USER } from './collections';
 
 /**
  * IRecipe document
@@ -16,11 +16,11 @@ export interface IRecipe extends Document {
   Added: Date;
 }
 
-const RecipeSchema: Schema = new Schema({
-  UserID: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
+const recipeSchema: Schema = new Schema({
+  UserID: { type: Schema.Types.ObjectId, ref: USER, required: true },
   Name: { type: Schema.Types.String, required: true },
   URL: { type: Schema.Types.String, required: true },
   Added: { type: Schema.Types.Date, required: true, default: Date.now }
 });
 
-export const Recipe = mongoose.model<IRecipe>(RecipeModel, RecipeSchema, RecipeCollection);
+export const Recipe = mongoose.model<IRecipe>(RECIPE, recipeSchema, RECIPE_COLLECTION);

@@ -1,0 +1,6 @@
+type Query {
+  users: [User!]!,
+  user(userID: ID!): User!
+  recipes: [Recipe!]!
+  recipe(recipeID: ID!): Recipe!
+}

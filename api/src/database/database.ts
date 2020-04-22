@@ -1,9 +1,11 @@
 import mongoose, { ConnectionOptions } from 'mongoose';
 
-const MongoConfig = {
-  URI: <string>process.env.DATABASE_CONNECTION,
+import { configuration } from '../configuration';
+
+const mongoConfig = {
+  URI: configuration.databaseConnection,
   OPTIONS: <ConnectionOptions>{
-    dbName: process.env.DATABASE_NAME,
+    dbName: configuration.databaseName,
     useNewUrlParser: true
   }
 };
@@ -13,8 +15,8 @@ const MongoConfig = {
  *
  * @returns
  */
-export const ConfigureMongoDB = () => {
-  mongoose.connect(MongoConfig.URI, MongoConfig.OPTIONS, (err) => {
+export const configureMongoDB = () => {
+  mongoose.connect(mongoConfig.URI, mongoConfig.OPTIONS, (err) => {
     console.log('Mongodb connected', err ? `with 💥 💥 💥 : ${err}` : 'successfully 👍.');
   });
 };
