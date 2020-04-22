@@ -2,7 +2,7 @@ import { IResolvers } from 'graphql-tools';
 
 const resolverMap: IResolvers = {
   Query: {
-    user(_: void, __: void): string {
+    hello(_obj, _args, _context, _info): string {
       return `👋 Hello world! 👋`;
     }
   }

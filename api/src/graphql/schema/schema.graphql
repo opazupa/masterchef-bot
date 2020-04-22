@@ -3,4 +3,5 @@ type Query {
   user(userID: ID!): User!
   recipes: [Recipe!]!
   recipe(recipeID: ID!): Recipe!
+  hello(args: [String]): String
 }
