@@ -14,7 +14,9 @@ This is the repository for the **Masterchef bot** features.
 
 ### Start up :rocket:
 
-Add configurations with `.env` file by taking a look from [`.example.env`](./.example.env) and [configurations](##Configuration).
+Add configurations with `.env` file by taking a look from [`.example.env`](./.example.env) and from
+- [api configurations](./api/README.md##Configuration)
+- [bot configurations](./bot/README.md##Configuration)
 
 ### Running with Make 😽
 
@@ -37,14 +39,4 @@ Run in `Production`
 make up
 make down
 ```
-
-
-## Configuration 🔧
-| Key | Value |
-| --- | --- |
-| `API_PORT`            | <port_number> for server to run on                 |
-| `BOT_API_KEY`         | <your_bot_api_key> from Telegram                   |
-| `DEBUG_MODE`          | true/false to enable detailed logging etc.         |
-| `DATABASE_CONNECTION` | <your_mongo_connection> to connect to mongo server |
-| `DATABASE_NAME`       | <your_db_name> to use in mongo server              | 
 

@@ -9,3 +9,9 @@ This is the node `GraphQL` API for **Masterchef** recipes.
 - Mongoose
 
 ## Schema + how to TODO Olli
+
+
+## Configuration 🔧
+| Key | Value |
+| --- | --- |
+| `PORT`            | <port_number> for api to run on    |

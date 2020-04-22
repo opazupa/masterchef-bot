@@ -29,7 +29,7 @@ services:
     command: bash -c "npm install && npm run start:dev"
 
     ports: 
-      - '${API_PORT}:${API_PORT}'
+      - '${PORT}:${PORT}'
       
     env_file:
       - ./.env
