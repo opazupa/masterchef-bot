@@ -1,7 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 import { RECIPE, RECIPE_COLLECTION, USER, USER_COLLECTION } from './collections';
-import { IUser } from './user';
+
+// import { IUser } from './user';
 
 /**
  * IRecipe document
@@ -38,7 +39,7 @@ const getUserRecipes = async (userId: string): Promise<IRecipe[]> => {
   return await Recipe.find({ UserID: userId });
 };
 
-const getFavouritedUsers = async (recipeId: string): Promise<IUser[]> => {
+const getFavouritedUsers = async (recipeId: string): Promise<any[]> => {
   return await Recipe.aggregate([
     {
       $match: {

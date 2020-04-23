@@ -1,15 +1,11 @@
-import 'graphql-import-node';
+import { buildSchema } from 'type-graphql';
 
-import { makeExecutableSchema } from 'apollo-server-express';
-import { GraphQLSchema } from 'graphql';
+import { RecipeResolver, UserResolver } from '../resolvers/';
 
-import { typeDefs } from '../types';
-import { resolverMap as resolvers } from './../resolvers';
-import * as schemaDef from './schema.graphql';
-
-const schema: GraphQLSchema = makeExecutableSchema({
-  typeDefs: [schemaDef, ...typeDefs],
-  resolvers
+const createSchema = buildSchema({
+  resolvers: [UserResolver, RecipeResolver],
+  emitSchemaFile: true,
+  validate: true
 });
 
-export { schema };
+export { createSchema };

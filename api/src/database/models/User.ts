@@ -3,13 +3,6 @@ import mongoose, { Document, Schema } from 'mongoose';
 import { RECIPE, RECIPE_COLLECTION, USER, USER_COLLECTION } from './collections';
 import { IRecipe } from './recipe';
 
-/**
- * IUser document
- *
- * @export
- * @interface IUser
- * @extends {Document}
- */
 export interface IUser extends Document {
   TelegramID: number;
   UserName: string;
