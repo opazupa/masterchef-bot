@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-import { RECIPE, RECIPE_COLLECTION, USER } from './collections';
+import { RECIPE, RECIPE_COLLECTION, USER, USER_COLLECTION } from './collections';
+import { IUser } from './user';
 
 /**
  * IRecipe document
@@ -10,7 +11,7 @@ import { RECIPE, RECIPE_COLLECTION, USER } from './collections';
  * @extends {Document}
  */
 export interface IRecipe extends Document {
-  UserID: number;
+  UserID: string;
   Name: string;
   URL: string;
   Added: Date;
@@ -23,4 +24,54 @@ const recipeSchema: Schema = new Schema({
   Added: { type: Schema.Types.Date, required: true, default: Date.now }
 });
 
-export const Recipe = mongoose.model<IRecipe>(RECIPE, recipeSchema, RECIPE_COLLECTION);
+const Recipe = mongoose.model<IRecipe>(RECIPE, recipeSchema, RECIPE_COLLECTION);
+
+const getAllRecipes = async (): Promise<IRecipe[]> => {
+  return await Recipe.find();
+};
+
+const getRecipe = async (id: string): Promise<IRecipe | null> => {
+  return await Recipe.findById(id);
+};
+
+const getUserRecipes = async (userId: string): Promise<IRecipe[]> => {
+  return await Recipe.find({ UserID: userId });
+};
+
+const getFavouritedUsers = async (recipeId: string): Promise<IUser[]> => {
+  return await Recipe.aggregate([
+    {
+      $match: {
+        _id: recipeId
+      }
+    },
+    {
+      $lookup: {
+        from: USER_COLLECTION,
+        localField: '_id',
+        foreignField: 'Favourites.RecipeID',
+        as: 'Favourited'
+      }
+    },
+    {
+      $unwind: {
+        path: '$Favourited',
+        preserveNullAndEmptyArrays: false
+      }
+    },
+    {
+      $project: {
+        _id: '$Favourited._id',
+        UserName: '$Favourited.UserName',
+        Registered: '$Favourited.Registered'
+      }
+    },
+    {
+      $sort: {
+        Name: -1
+      }
+    }
+  ]);
+};
+
+export { getAllRecipes, getRecipe, getUserRecipes, getFavouritedUsers };

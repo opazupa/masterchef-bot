@@ -1,1 +1,1 @@
-export * from './root-resolver';
+export * from './resolver-map';

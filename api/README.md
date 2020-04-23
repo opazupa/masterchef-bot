@@ -5,7 +5,7 @@ This is the node `GraphQL` API for **Masterchef** recipes.
 ## Components
 - Typescript
 - Express
-- GraphQL
+- Apollo Server - GraphQL
 - Mongoose
 
 ## Schema + how to TODO Olli
@@ -14,4 +14,5 @@ This is the node `GraphQL` API for **Masterchef** recipes.
 ## Configuration 🔧
 | Key | Value |
 | --- | --- |
-| `PORT`            | <port_number> for api to run on    |
+| `PORT`                | <port_number> for api to run on           |
+| `ENABLE_PLAYGROUND`   | `true/false` to enable graphql playground   |

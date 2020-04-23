@@ -4,14 +4,14 @@ User type
 type User {
 
     """User ID"""
-    ID: ID!
+    id: ID!
 
     """UserName"""
-    UserName: String!
+    userName: String!
 
     """Registered timestamp"""
-    Registered: Date!
+    registered: Date!
 
-    """Favourite recipes"""
-    Favourites: [Recipe]
+    # """Favourite recipes"""
+    favourites: [Recipe]
 }

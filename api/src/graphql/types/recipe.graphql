@@ -4,20 +4,20 @@ Recipe type
 type Recipe {
     
     """Recipe ID"""
-    ID: ID!
+    id: ID!
 
     """User ID who added the recipe"""
-    UserID: ID!
+    userId: ID!
 
     """Recipe Name"""
-    Name: String!
+    name: String!
 
     """Recipe Url"""
-    Url: String!
+    url: String!
 
     """Added timestamp"""
-    Added: Date!
+    added: Date!
 
-    """Favourited by"""
-    Favourited: [User]
+    # """Favourited by"""
+    favourited: [User]
 }

@@ -15,8 +15,8 @@ const mongoConfig = {
  *
  * @returns
  */
-export const configureMongoDB = () => {
-  mongoose.connect(mongoConfig.URI, mongoConfig.OPTIONS, (err) => {
+export const configureMongoDB = async () => {
+  await mongoose.connect(mongoConfig.URI, mongoConfig.OPTIONS, (err) => {
     console.log('Mongodb connected', err ? `with 💥 💥 💥 : ${err}` : 'successfully 👍.');
   });
 };

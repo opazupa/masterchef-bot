@@ -1,7 +1,6 @@
 type Query {
-  users: [User!]!,
-  user(userID: ID!): User!
-  recipes: [Recipe!]!
-  recipe(recipeID: ID!): Recipe!
-  hello(args: [String]): String
+  users: [User],
+  user(id: ID!): User!
+  recipes: [Recipe]
+  recipe(id: ID!): Recipe!
 }

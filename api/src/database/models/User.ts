@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-import { RECIPE, USER, USER_COLLECTION } from './collections';
+import { RECIPE, RECIPE_COLLECTION, USER, USER_COLLECTION } from './collections';
+import { IRecipe } from './recipe';
 
 /**
  * IUser document
@@ -13,7 +14,7 @@ export interface IUser extends Document {
   TelegramID: number;
   UserName: string;
   Registered: Date;
-  Favourites: { RecipeID: any }[];
+  Favourites: { RecipeID: string }[];
 }
 
 const userSchema: Schema = new Schema({
@@ -27,4 +28,52 @@ const userSchema: Schema = new Schema({
   ]
 });
 
-export default mongoose.model<IUser>(USER, userSchema, USER_COLLECTION);
+const User = mongoose.model<IUser>(USER, userSchema, USER_COLLECTION);
+
+const getUsers = async (): Promise<IUser[]> => {
+  return await User.find();
+};
+
+const getUser = async (id: string): Promise<IUser | null> => {
+  return await User.findById(id);
+};
+
+const getFavouriteRecipes = async (userId: string): Promise<IRecipe[]> => {
+  return await User.aggregate([
+    {
+      $match: {
+        _id: userId
+      }
+    },
+    {
+      $lookup: {
+        from: RECIPE_COLLECTION,
+        localField: 'Favourites.RecipeID',
+        foreignField: '_id',
+        as: 'FavouriteRecipe'
+      }
+    },
+    {
+      $unwind: {
+        path: '$FavouriteRecipe',
+        preserveNullAndEmptyArrays: false
+      }
+    },
+    {
+      $project: {
+        _id: '$FavouriteRecipe._id',
+        Name: '$FavouriteRecipe.Name',
+        URL: '$FavouriteRecipe.URL',
+        Added: '$FavouriteRecipe.Added',
+        UserID: '$FavouriteRecipe.UserID'
+      }
+    },
+    {
+      $sort: {
+        Name: -1
+      }
+    }
+  ]);
+};
+
+export { getUsers, getUser, getFavouriteRecipes };

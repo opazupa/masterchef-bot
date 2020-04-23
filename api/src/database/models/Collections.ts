@@ -1,4 +1,4 @@
-/*
+/**
  *   Constants for mongo collections
  */
 

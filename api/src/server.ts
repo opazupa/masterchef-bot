@@ -17,30 +17,20 @@ app.disable('x-powered-by');
 app.use('*', cors());
 app.use(compression());
 
-// Setup DB and server
+// Setup GraphQL server
 const server = new ApolloServer({
   schema,
   validationRules: [depthLimit(7)],
   introspection: true,
-  playground: true,
-  context: async ({ req, connection, payload }: any) => {
-    console.log(`context: ${payload}`);
-    if (connection) {
-      return { isAuth: payload.authToken };
-    }
-    return { isAuth: req.isAuth };
-  }
+  playground: true
 });
-
-app.use('*', cors());
-app.use(compression());
 server.applyMiddleware({ app, path: '/graphql' });
 
+// Setup DB
 configureMongoDB();
+
 const httpServer = createServer(app);
-
 httpServer.on('error', (e) => console.error(e));
-
 httpServer.listen({ port: configuration.port }, () => {
   console.log(`🚀 Test api is running on port ${configuration.port}`);
 });
