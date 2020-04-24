@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-import { RECIPE, RECIPE_COLLECTION, USER, USER_COLLECTION } from './collections';
+import { RECIPE, RECIPE_COLLECTION, USER, USER_COLLECTION } from '../collections';
 
 /**
  * IRecipe document
