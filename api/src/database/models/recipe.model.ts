@@ -13,20 +13,43 @@ interface IRecipe extends Document {
   Name: string;
   URL: string;
   Added: Date;
+  Updated: Date;
 }
 
 /**
  * Recipe schema
  */
-const recipeSchema: Schema = new Schema({
-  UserID: { type: Schema.Types.ObjectId, ref: USER, required: true },
-  Name: { type: Schema.Types.String, required: true },
-  URL: { type: Schema.Types.String, required: true },
-  Added: { type: Schema.Types.Date, required: true, default: Date.now }
-});
+const recipeSchema: Schema = new Schema(
+  {
+    UserID: { type: Schema.Types.ObjectId, ref: USER, required: true },
+    Name: { type: Schema.Types.String, required: true },
+    URL: { type: Schema.Types.String, required: true },
+    Added: { type: Schema.Types.Date, required: true, default: Date.now },
+    Updated: { type: Schema.Types.Date, required: false, default: null }
+  },
+  {
+    timestamps: {
+      createdAt: 'Added',
+      updatedAt: 'Updated'
+    }
+  }
+);
 
 // Recipe mongoose model
 const Recipes = mongoose.model<IRecipe>(RECIPE, recipeSchema, RECIPE_COLLECTION);
+
+/**
+ * Add new recipe
+ *
+ * @returns {Promise<IRecipe>}
+ */
+const addRecipe = async (userId: string, name: string, url: string): Promise<IRecipe> => {
+  return await Recipes.create({
+    UserID: userId,
+    Name: name,
+    URL: url
+  } as IRecipe);
+};
 
 /**
  * Get all recipes
@@ -99,4 +122,29 @@ const getFavouriters = async (recipeId: string): Promise<any[]> => {
   ]);
 };
 
-export { IRecipe, getAllRecipes, getRecipe, getUserRecipes, getFavouriters };
+/**
+ * Update new recipe
+ *
+ * @returns {Promise<IRecipe | null>}
+ */
+const updateRecipe = async (id: string, name: string, url: string): Promise<IRecipe | null> => {
+  await Recipes.findOneAndUpdate(
+    { _id: id },
+    {
+      Name: name,
+      URL: url
+    }
+  );
+  return await Recipes.findById(id);
+};
+
+/**
+ * Delete the recipe
+ *
+ * @returns {Promise<void>}
+ */
+const deleteRecipe = async (id: string): Promise<void | null> => {
+  await Recipes.findOneAndDelete({ _id: id });
+};
+
+export { IRecipe, addRecipe, getAllRecipes, getRecipe, getUserRecipes, getFavouriters, updateRecipe, deleteRecipe };

@@ -24,4 +24,7 @@ export class Recipe {
 
   @Field(() => Date, { name: 'added' })
   Added!: Date;
+
+  @Field(() => Date, { name: 'updated', nullable: true })
+  Updated?: Date;
 }

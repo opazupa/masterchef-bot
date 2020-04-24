@@ -1,9 +1,9 @@
 import { ApolloError } from 'apollo-server-express';
-import { Arg, FieldResolver, Query, Resolver, Root } from 'type-graphql';
+import { Args, FieldResolver, Query, Resolver, Root } from 'type-graphql';
 
 import { getFavouriteRecipes, getUser, getUsers, IRecipe, IUser } from '../../database/models';
 import { NOT_FOUND } from '../../errors';
-import { Recipe, User } from '../types';
+import { IdArg, Recipe, User } from '../types';
 
 /**
  * User resolver
@@ -18,7 +18,7 @@ export class UserResolver {
    */
 
   @Query((_returns) => User, { nullable: true, description: 'Get user by id' })
-  async user(@Arg('id') id: string): Promise<IUser | null> {
+  async user(@Args() { id }: IdArg): Promise<IUser | null> {
     return await getUser(id).catch((e) => {
       console.error(e);
       throw new ApolloError(`Recipe not found with id ${id}`, NOT_FOUND);

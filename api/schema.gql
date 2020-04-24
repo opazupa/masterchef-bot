@@ -8,15 +8,47 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
+type Mutation {
+  """Add recipe"""
+  addRecipe(
+    """User Id"""
+    userId: ID!
+
+    """Recipe info"""
+    recipe: RecipeInputType!
+  ): Recipe!
+
+  """Update recipe"""
+  updateRecipe(
+    """Id"""
+    id: ID!
+
+    """Recipe info"""
+    recipe: RecipeInputType!
+  ): Recipe!
+
+  """Delete recipe"""
+  deleteRecipe(
+    """Id"""
+    id: ID!
+  ): ID!
+}
+
 type Query {
   """Get Recipe by id"""
-  recipe(id: String!): Recipe
+  recipe(
+    """Id"""
+    id: ID!
+  ): Recipe
 
   """Get all Recipes"""
   recipes: [Recipe!]!
 
   """Get user by id"""
-  user(id: String!): User
+  user(
+    """Id"""
+    id: ID!
+  ): User
 
   """Get all users"""
   users: [User!]!
@@ -29,9 +61,15 @@ type Recipe {
   url: String!
   userId: String!
   added: DateTime!
+  updated: DateTime
 
   """Users who have favourited the recipe"""
   favouritedBy: [User!]
+}
+
+input RecipeInputType {
+  name: String!
+  url: String!
 }
 
 """The User model"""

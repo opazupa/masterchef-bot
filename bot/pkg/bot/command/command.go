@@ -198,7 +198,6 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 
 		// Get user favourite recipes
 		favouriteRecipes := recipecollection.GetFavouritesByUser(user.ID)
-		log.Print(len(*favouriteRecipes))
 		if funk.Any(favouriteRecipes) {
 			// Add header message
 			messages = append(messages, command.messageFromDescription(chatID, user.UserName))

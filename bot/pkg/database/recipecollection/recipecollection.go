@@ -14,11 +14,12 @@ import (
 
 // Recipe document
 type Recipe struct {
-	ID     primitive.ObjectID `bson:"_id"`
-	UserID primitive.ObjectID `bson:"UserID"`
-	Name   string             `bson:"Name"`
-	URL    string             `bson:"URL"`
-	Added  time.Time          `bson:"Added"`
+	ID      primitive.ObjectID `bson:"_id"`
+	UserID  primitive.ObjectID `bson:"UserID"`
+	Name    string             `bson:"Name"`
+	URL     string             `bson:"URL"`
+	Added   time.Time          `bson:"Added"`
+	Updated time.Time          `bson:"Updated, omitempty"`
 }
 
 // FavouriteRecipe extending the Recipe
