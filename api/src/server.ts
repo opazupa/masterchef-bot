@@ -24,8 +24,8 @@ const bootstrap = async () => {
   const server = new ApolloServer({
     schema: await createSchema,
     validationRules: [depthLimit(7)],
-    introspection: true,
-    playground: true
+    introspection: configuration.enablePlayground,
+    playground: configuration.enablePlayground
   });
   server.applyMiddleware({ app, path: '/graphql' });
 
@@ -38,4 +38,5 @@ const bootstrap = async () => {
     console.log(`🚀 Test api is running on port ${configuration.port}`);
   });
 };
+
 bootstrap().catch((err) => console.log(err));

@@ -1,15 +1,26 @@
 import * as dotenv from 'dotenv';
 
+/**
+ * Env configuration interface
+ *
+ * @interface IConfiguration
+ */
 interface IConfiguration {
   port: string | number;
-  debugMode: Boolean;
+  debugMode: boolean;
   databaseConnection: string;
   databaseName: string;
-  enablePlayground: Boolean;
+  enablePlayground: boolean;
 }
 
+// Apply .env
 dotenv.config();
 
+/**
+ * Env configuration
+ *
+ * @interface IConfiguration
+ */
 export const configuration: IConfiguration = {
   port: process.env.PORT || 3000,
   debugMode: process.env.DEBUG_MODE === 'true',

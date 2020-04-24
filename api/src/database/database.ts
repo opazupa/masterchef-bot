@@ -2,6 +2,7 @@ import mongoose, { ConnectionOptions } from 'mongoose';
 
 import { configuration } from '../configuration';
 
+// Mongo configuration
 const mongoConfig = {
   URI: configuration.databaseConnection,
   OPTIONS: <ConnectionOptions>{

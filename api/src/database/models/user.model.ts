@@ -1,15 +1,24 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 import { RECIPE, RECIPE_COLLECTION, USER, USER_COLLECTION } from './collections';
-import { IRecipe } from './recipe';
+import { IRecipe } from './recipe.model';
 
-export interface IUser extends Document {
+/**
+ * IUser document
+ *
+ * @interface IUser
+ * @extends {Document}
+ */
+interface IUser extends Document {
   TelegramID: number;
   UserName: string;
   Registered: Date;
   Favourites: { RecipeID: string }[];
 }
 
+/**
+ * User schema
+ */
 const userSchema: Schema = new Schema({
   TelegramID: { type: Schema.Types.Number, required: true },
   UserName: { type: Schema.Types.String, required: true },
@@ -21,18 +30,36 @@ const userSchema: Schema = new Schema({
   ]
 });
 
-const User = mongoose.model<IUser>(USER, userSchema, USER_COLLECTION);
+// User mongoose model
+const Users = mongoose.model<IUser>(USER, userSchema, USER_COLLECTION);
 
+/**
+ * Get users
+ *
+ * @returns {Promise<IUser[]>}
+ */
 const getUsers = async (): Promise<IUser[]> => {
-  return await User.find();
+  return await Users.find();
 };
 
+/**
+ * Get user by id
+ *
+ * @param {string} id
+ * @returns {(Promise<IUser | null>)}
+ */
 const getUser = async (id: string): Promise<IUser | null> => {
-  return await User.findById(id);
+  return await Users.findById(id);
 };
 
+/**
+ * Get favourite recipes by user
+ *
+ * @param {string} userId
+ * @returns {Promise<IRecipe[]>}
+ */
 const getFavouriteRecipes = async (userId: string): Promise<IRecipe[]> => {
-  return await User.aggregate([
+  return await Users.aggregate([
     {
       $match: {
         _id: userId
@@ -69,4 +96,4 @@ const getFavouriteRecipes = async (userId: string): Promise<IRecipe[]> => {
   ]);
 };
 
-export { getUsers, getUser, getFavouriteRecipes };
+export { IUser, getUsers, getUser, getFavouriteRecipes };

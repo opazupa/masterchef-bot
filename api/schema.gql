@@ -29,6 +29,9 @@ type Recipe {
   url: String!
   userId: String!
   added: DateTime!
+
+  """Users who have favourited the recipe"""
+  favouritedBy: [User!]
 }
 
 """The User model"""
@@ -36,4 +39,5 @@ type User {
   id: ID!
   userName: String!
   registered: DateTime!
+  favourites: [Recipe!]
 }

@@ -5,11 +5,14 @@
   "main": "server.ts",
   "scripts": {
     "start:dev": "npm run build:dev",
-    "build:dev": "nodemon 'src/server.ts' --exec 'ts-node' src/server.ts -e ts,graphql",
+    "build:dev": "nodemon 'src/server.ts' --exec 'ts-node' src/server.ts -e ts",
     "build": "rm -rf ./dist && tsc",
     "start": "node dist/server.js"
   },
   "keywords": [],
+  "repository": {
+    "url": "https://github.com/opazupa/masterchef-bot"
+  },
   "author": "Olli Saarinen",
   "license": "MIT",
   "devDependencies": {

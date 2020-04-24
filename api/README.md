@@ -8,11 +8,11 @@ This is the node `GraphQL` API for **Masterchef** recipes.
 - Apollo Server - GraphQL
 - Mongoose
 
-## Schema + how to TODO Olli
+## [Schema](./schema.gql)
 
 
 ## Configuration 🔧
 | Key | Value |
 | --- | --- |
 | `PORT`                | <port_number> for api to run on           |
-| `ENABLE_PLAYGROUND`   | `true/false` to enable graphql playground   |
+| `ENABLE_PLAYGROUND`   | `true/false` to enable graphql playground in `/grahpql`   |

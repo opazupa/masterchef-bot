@@ -2,22 +2,22 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 import { RECIPE, RECIPE_COLLECTION, USER, USER_COLLECTION } from './collections';
 
-// import { IUser } from './user';
-
 /**
  * IRecipe document
  *
- * @export
  * @interface IRecipe
  * @extends {Document}
  */
-export interface IRecipe extends Document {
+interface IRecipe extends Document {
   UserID: string;
   Name: string;
   URL: string;
   Added: Date;
 }
 
+/**
+ * Recipe schema
+ */
 const recipeSchema: Schema = new Schema({
   UserID: { type: Schema.Types.ObjectId, ref: USER, required: true },
   Name: { type: Schema.Types.String, required: true },
@@ -25,22 +25,46 @@ const recipeSchema: Schema = new Schema({
   Added: { type: Schema.Types.Date, required: true, default: Date.now }
 });
 
-const Recipe = mongoose.model<IRecipe>(RECIPE, recipeSchema, RECIPE_COLLECTION);
+// Recipe mongoose model
+const Recipes = mongoose.model<IRecipe>(RECIPE, recipeSchema, RECIPE_COLLECTION);
 
+/**
+ * Get all recipes
+ *
+ * @returns {Promise<IRecipe[]>}
+ */
 const getAllRecipes = async (): Promise<IRecipe[]> => {
-  return await Recipe.find();
+  return await Recipes.find();
 };
 
+/**
+ * Get recipe by id
+ *
+ * @param {string} id
+ * @returns {(Promise<IRecipe | null>)}
+ */
 const getRecipe = async (id: string): Promise<IRecipe | null> => {
-  return await Recipe.findById(id);
+  return await Recipes.findById(id);
 };
 
+/**
+ * Get recipes by user
+ *
+ * @param {string} userId
+ * @returns {Promise<IRecipe[]>}
+ */
 const getUserRecipes = async (userId: string): Promise<IRecipe[]> => {
-  return await Recipe.find({ UserID: userId });
+  return await Recipes.find({ UserID: userId });
 };
 
-const getFavouritedUsers = async (recipeId: string): Promise<any[]> => {
-  return await Recipe.aggregate([
+/**
+ * Get users who have favourited the recipe
+ *
+ * @param {string} recipeId
+ * @returns {Promise<any[]>}
+ */
+const getFavouriters = async (recipeId: string): Promise<any[]> => {
+  return await Recipes.aggregate([
     {
       $match: {
         _id: recipeId
@@ -75,4 +99,4 @@ const getFavouritedUsers = async (recipeId: string): Promise<any[]> => {
   ]);
 };
 
-export { getAllRecipes, getRecipe, getUserRecipes, getFavouritedUsers };
+export { IRecipe, getAllRecipes, getRecipe, getUserRecipes, getFavouriters };
