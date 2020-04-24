@@ -72,6 +72,35 @@ input RecipeInputType {
   url: String!
 }
 
+type Subscription {
+  """Notification on new recipe"""
+  newRecipe(
+    """User Id filter"""
+    userId: ID
+
+    """Recipe name like-filter"""
+    name: String
+
+    """Recipe url like-filter"""
+    url: String
+  ): Recipe!
+
+  """Notification on recipe update"""
+  updatedRecipe(
+    """User Id filter"""
+    userId: ID
+
+    """Recipe name like-filter"""
+    name: String
+
+    """Recipe url like-filter"""
+    url: String
+  ): Recipe!
+
+  """Notification on deleted recipes"""
+  deletedRecipe: String!
+}
+
 """The User model"""
 type User {
   id: ID!

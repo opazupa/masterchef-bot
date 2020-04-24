@@ -1,5 +1,17 @@
 import { ApolloError } from 'apollo-server-express';
-import { Args, FieldResolver, ID, Mutation, Query, Resolver, Root } from 'type-graphql';
+import {
+  Args,
+  FieldResolver,
+  ID,
+  Mutation,
+  Publisher,
+  PubSub,
+  Query,
+  Resolver,
+  ResolverFilterData,
+  Root,
+  Subscription,
+} from 'type-graphql';
 
 import {
   addRecipe,
@@ -13,6 +25,7 @@ import {
 } from '../../database/models';
 import { NOT_FOUND } from '../../errors';
 import { CreateRecipeArgs, IdArg, Recipe, UpdateRecipeArgs, User } from '../types';
+import { RecipeTopicArgs, Topics } from '../types/topics';
 
 /**
  * Recipe resolver
@@ -44,24 +57,90 @@ export class RecipeResolver {
    */
 
   @Mutation(() => Recipe, { description: 'Add recipe' })
-  async addRecipe(@Args() { userId, recipe }: CreateRecipeArgs) {
-    return await addRecipe(userId, recipe.name, recipe.url);
+  async addRecipe(
+    @Args() { userId, recipe }: CreateRecipeArgs,
+    @PubSub(Topics.NewRecipe) newRecipeNotification: Publisher<Recipe>
+  ) {
+    const added = await addRecipe(userId, recipe.name, recipe.url);
+    await newRecipeNotification(added);
+    return added;
   }
 
   @Mutation(() => Recipe, { description: 'Update recipe' })
-  async updateRecipe(@Args() { id, recipe }: UpdateRecipeArgs) {
-    return await updateRecipe(id, recipe.name, recipe.url).catch((e) => {
+  async updateRecipe(
+    @Args() { id, recipe }: UpdateRecipeArgs,
+    @PubSub(Topics.UpdatedRecipe) updatedRecipeNotification: Publisher<Recipe>
+  ) {
+    const updated = await updateRecipe(id, recipe.name, recipe.url).catch((e) => {
       console.error(e);
       throw new ApolloError(`Recipe not found with id ${id}`, NOT_FOUND);
     });
+    await updatedRecipeNotification(updated!);
+    return updated;
   }
 
   @Mutation(() => ID, { description: 'Delete recipe' })
-  async deleteRecipe(@Args() { id }: IdArg) {
+  async deleteRecipe(
+    @Args() { id }: IdArg,
+    @PubSub(Topics.DeletedRecipe) deletedRecipeNotification: Publisher<string>
+  ) {
     await deleteRecipe(id).catch((e) => {
       console.error(e);
       throw new ApolloError(`Recipe not found with id ${id}`, NOT_FOUND);
     });
+    await deletedRecipeNotification(id);
+    return id;
+  }
+
+  /**
+   * Subscriptions
+   */
+  @Subscription({
+    topics: Topics.NewRecipe,
+    filter: ({ payload, args }: ResolverFilterData<Recipe, RecipeTopicArgs>) => {
+      if (args.userId) {
+        return args.userId == payload.UserID;
+      }
+      if (args.name) {
+        return payload.Name.includes(args.name);
+      }
+      if (args.url) {
+        return payload.URL.includes(args.url);
+      }
+      return true;
+    },
+    description: 'Notification on new recipe'
+  })
+  newRecipe(@Root() recipe: IRecipe, @Args() _args: RecipeTopicArgs): Recipe {
+    return recipe;
+  }
+
+  @Subscription({
+    topics: Topics.UpdatedRecipe,
+    filter: ({ payload, args }: ResolverFilterData<Recipe, RecipeTopicArgs>) => {
+      console.log(payload, args);
+      if (args.userId) {
+        return args.userId == payload.UserID;
+      }
+      if (args.name) {
+        return payload.Name.includes(args.name);
+      }
+      if (args.url) {
+        return payload.URL.includes(args.url);
+      }
+      return true;
+    },
+    description: 'Notification on recipe update'
+  })
+  updatedRecipe(@Root() recipe: IRecipe, @Args() _args: RecipeTopicArgs): Recipe {
+    return recipe;
+  }
+
+  @Subscription({
+    topics: Topics.DeletedRecipe,
+    description: 'Notification on deleted recipes'
+  })
+  deletedRecipe(@Root() id: string): string {
     return id;
   }
 

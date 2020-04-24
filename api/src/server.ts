@@ -25,7 +25,10 @@ const bootstrap = async () => {
     schema: await createSchema,
     validationRules: [depthLimit(7)],
     introspection: configuration.enablePlayground,
-    playground: configuration.enablePlayground
+    playground: configuration.enablePlayground,
+    subscriptions: {
+      path: '/subscriptions'
+    }
   });
   server.applyMiddleware({ app, path: '/graphql' });
 
@@ -33,6 +36,7 @@ const bootstrap = async () => {
   configureMongoDB();
 
   const httpServer = createServer(app);
+  server.installSubscriptionHandlers(httpServer);
   httpServer.on('error', (e) => console.error(e));
   httpServer.listen({ port: configuration.port }, () => {
     console.log(`🚀 Test api is running on port ${configuration.port}`);
