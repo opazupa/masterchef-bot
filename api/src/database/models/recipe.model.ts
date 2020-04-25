@@ -72,29 +72,38 @@ const getRecipe = async (id: string): Promise<IRecipe | null> => {
 };
 
 /**
+ * Get recipes by ids
+ *
+ * @param {string[]} ids
+ * @returns {(Promise<Map<string, IRecipe | null>>)}
+ */
+const getRecipes = async (ids: string[]): Promise<Map<string, IRecipe | null>> => {
+  const recipes = await Recipes.find({ _id: { $in: ids } });
+  return new Map(ids.map((id) => [id, recipes.find((r) => r._id.toString() === id.toString()) || null]));
+};
+
+/**
  * Get recipes by user
  *
  * @param {string[]} userIds
- * @returns {Promise<IRecipe[]>}
+ * @returns {Promise<Map<string, IRecipe[]>>}
  */
 const getUserRecipes = async (userIds: string[]): Promise<Map<string, IRecipe[]>> => {
   const recipes = await Recipes.find({ UserID: { $in: userIds } });
-  console.log(new Set(recipes.map((r) => r.UserID)));
-
   return new Map(userIds.map((userId) => [userId, recipes.filter((r) => r.UserID.toString() === userId.toString())]));
 };
 
 /**
  * Get users who have favourited the recipe
  *
- * @param {string} recipeId
- * @returns {Promise<any[]>}
+ * @param {string[]} recipeIds
+ * @returns {Promise<Map<string, IUser[]>>}
  */
-const getFavouriters = async (recipeId: string): Promise<IUser[]> => {
-  return await Recipes.aggregate([
+const getFavouriters = async (recipeIds: string[]): Promise<Map<string, IUser[]>> => {
+  const results = (await Recipes.aggregate([
     {
       $match: {
-        _id: recipeId
+        _id: { $in: recipeIds }
       }
     },
     {
@@ -106,24 +115,17 @@ const getFavouriters = async (recipeId: string): Promise<IUser[]> => {
       }
     },
     {
-      $unwind: {
-        path: '$Favourited',
-        preserveNullAndEmptyArrays: false
-      }
-    },
-    {
-      $project: {
-        _id: '$Favourited._id',
-        UserName: '$Favourited.UserName',
-        Registered: '$Favourited.Registered'
-      }
-    },
-    {
       $sort: {
-        Name: -1
+        'Favourited.Name': -1
       }
     }
-  ]);
+  ])) as (IRecipe & { Favourited: IUser[] })[];
+  return new Map(
+    recipeIds.map((recipeId) => [
+      recipeId,
+      results.filter((r) => r._id.toString() === recipeId.toString()).flatMap((r) => r.Favourited)
+    ])
+  );
 };
 
 /**
@@ -151,4 +153,14 @@ const deleteRecipe = async (id: string): Promise<void | null> => {
   await Recipes.findOneAndDelete({ _id: id });
 };
 
-export { IRecipe, addRecipe, getAllRecipes, getRecipe, getUserRecipes, getFavouriters, updateRecipe, deleteRecipe };
+export {
+  IRecipe,
+  addRecipe,
+  getAllRecipes,
+  getRecipes,
+  getRecipe,
+  getUserRecipes,
+  getFavouriters,
+  updateRecipe,
+  deleteRecipe
+};

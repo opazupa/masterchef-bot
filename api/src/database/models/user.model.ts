@@ -38,8 +38,19 @@ const Users = mongoose.model<IUser>(USER, userSchema, USER_COLLECTION);
  *
  * @returns {Promise<IUser[]>}
  */
-const getUsers = async (): Promise<IUser[]> => {
+const getAllUsers = async (): Promise<IUser[]> => {
   return await Users.find();
+};
+
+/**
+ * Get users by ids
+ *
+ * @param {string[]} ids
+ * @returns {(Promise<Map<string, IUser | null>>)}
+ */
+const getUsers = async (ids: string[]): Promise<Map<string, IUser | null>> => {
+  const users = await Users.find({ _id: { $in: ids } });
+  return new Map(ids.map((id) => [id, users.find((r) => r._id.toString() === id.toString()) || null]));
 };
 
 /**
@@ -53,16 +64,16 @@ const getUser = async (id: string): Promise<IUser | null> => {
 };
 
 /**
- * Get favourite recipes by user
+ * Get favourite recipes by users
  *
- * @param {string} userId
+ * @param {string[]} userIds
  * @returns {Promise<IRecipe[]>}
  */
-const getFavouriteRecipes = async (userId: string): Promise<IRecipe[]> => {
-  return await Users.aggregate([
+const getFavouriteRecipes = async (userIds: string[]): Promise<Map<string, IRecipe[]>> => {
+  const recipes = (await Users.aggregate([
     {
       $match: {
-        _id: userId
+        _id: { $in: userIds }
       }
     },
     {
@@ -93,7 +104,9 @@ const getFavouriteRecipes = async (userId: string): Promise<IRecipe[]> => {
         Name: -1
       }
     }
-  ]);
+  ])) as IRecipe[];
+
+  return new Map(userIds.map((userId) => [userId, recipes.filter((r) => r.UserID.toString() === userId.toString())]));
 };
 
-export { IUser, getUsers, getUser, getFavouriteRecipes };
+export { IUser, getAllUsers, getUsers, getUser, getFavouriteRecipes };

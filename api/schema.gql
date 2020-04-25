@@ -59,12 +59,14 @@ type Recipe {
   id: ID!
   name: String!
   url: String!
-  userId: String!
   added: DateTime!
   updated: DateTime
 
   """Users who have favourited the recipe"""
   favouritedBy: [User!]
+
+  """User who added the recipe"""
+  user: User!
 }
 
 input RecipeInputType {
@@ -106,6 +108,10 @@ type User {
   id: ID!
   userName: String!
   registered: DateTime!
+
+  """Favourite recipes"""
   favourites: [Recipe!]
+
+  """Added recipes"""
   recipes: [Recipe!]
 }

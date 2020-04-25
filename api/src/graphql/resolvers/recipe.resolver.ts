@@ -1,6 +1,7 @@
 import { ApolloError } from 'apollo-server-express';
 import {
   Args,
+  Ctx,
   FieldResolver,
   ID,
   Mutation,
@@ -13,16 +14,8 @@ import {
   Subscription,
 } from 'type-graphql';
 
-import {
-  addRecipe,
-  deleteRecipe,
-  getAllRecipes,
-  getFavouriters,
-  getRecipe,
-  IRecipe,
-  IUser,
-  updateRecipe,
-} from '../../database/models';
+import { IContext } from '../../context';
+import { addRecipe, deleteRecipe, getAllRecipes, getRecipe, IRecipe, IUser, updateRecipe } from '../../database/models';
 import { NOT_FOUND } from '../../errors';
 import { CreateRecipeArgs, IdArg, Recipe, UpdateRecipeArgs, User } from '../types';
 import { RecipeTopicArgs, Topics } from '../types/topics';
@@ -97,7 +90,7 @@ export class RecipeResolver {
    */
   @Subscription({
     topics: Topics.NewRecipe,
-    filter: ({ payload, args }: ResolverFilterData<Recipe, RecipeTopicArgs>) => {
+    filter: ({ payload, args }: ResolverFilterData<IRecipe, RecipeTopicArgs>) => {
       if (args.userId) {
         return args.userId == payload.UserID;
       }
@@ -117,8 +110,7 @@ export class RecipeResolver {
 
   @Subscription({
     topics: Topics.UpdatedRecipe,
-    filter: ({ payload, args }: ResolverFilterData<Recipe, RecipeTopicArgs>) => {
-      console.log(payload, args);
+    filter: ({ payload, args }: ResolverFilterData<IRecipe, RecipeTopicArgs>) => {
       if (args.userId) {
         return args.userId.toString() == payload.UserID.toString();
       }
@@ -148,8 +140,20 @@ export class RecipeResolver {
    * Fields
    */
 
-  @FieldResolver((_type) => [User], { description: 'Users who have favourited the recipe', defaultValue: [] })
-  async favouritedBy(@Root() recipe: IRecipe): Promise<IUser[]> {
-    return await getFavouriters(recipe._id);
+  @FieldResolver((_type) => [User], {
+    description: 'Users who have favourited the recipe',
+    defaultValue: [],
+    nullable: true
+  })
+  async favouritedBy(@Root() recipe: IRecipe, @Ctx() ctx: IContext): Promise<IUser[]> {
+    return await ctx.loaders.recipe.favouriters.load(recipe._id);
+  }
+
+  @FieldResolver((_type) => User, { description: 'User who added the recipe' })
+  async user(@Root() recipe: IRecipe, @Ctx() ctx: IContext): Promise<IUser | null> {
+    return await ctx.loaders.recipe.user.load(recipe.UserID).catch((e) => {
+      console.error(e);
+      throw new ApolloError(`User not found with id ${recipe.UserID}`, NOT_FOUND);
+    });
   }
 }

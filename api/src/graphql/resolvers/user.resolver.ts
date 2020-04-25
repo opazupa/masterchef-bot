@@ -1,8 +1,8 @@
 import { ApolloError } from 'apollo-server-express';
 import { Args, Ctx, FieldResolver, Query, Resolver, Root } from 'type-graphql';
 
-import { getFavouriteRecipes, getUser, getUsers, IRecipe, IUser } from '../../database/models';
-import { IBatchLoaders } from '../../dataloaders';
+import { IContext } from '../../context';
+import { getAllUsers, getUser, IRecipe, IUser } from '../../database/models';
 import { NOT_FOUND } from '../../errors';
 import { IdArg, Recipe, User } from '../types';
 
@@ -28,20 +28,20 @@ export class UserResolver {
 
   @Query((_returns) => [User], { description: 'Get all users' })
   async users(): Promise<IUser[]> {
-    return await getUsers();
+    return await getAllUsers();
   }
 
   /**
    * Fields
    */
 
-  @FieldResolver((_type) => [Recipe], { defaultValue: [] })
-  async favourites(@Root() user: IUser): Promise<IRecipe[]> {
-    return await getFavouriteRecipes(user._id);
+  @FieldResolver((_type) => [Recipe], { description: 'Favourite recipes', defaultValue: [], nullable: true })
+  async favourites(@Root() user: IUser, @Ctx() ctx: IContext): Promise<IRecipe[]> {
+    return ctx.loaders.user.favourites.load(user._id);
   }
 
-  @FieldResolver((_type) => [Recipe], { defaultValue: [] })
-  async recipes(@Root() user: IUser, @Ctx() ctx: { loaders: IBatchLoaders }): Promise<IRecipe[]> {
+  @FieldResolver((_type) => [Recipe], { description: 'Added recipes', defaultValue: [], nullable: true })
+  async recipes(@Root() user: IUser, @Ctx() ctx: IContext): Promise<IRecipe[]> {
     return await ctx.loaders.user.recipes.load(user._id);
   }
 }

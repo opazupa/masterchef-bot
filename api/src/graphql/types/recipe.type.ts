@@ -19,9 +19,6 @@ export class Recipe {
   @Field(() => String, { name: 'url' })
   URL!: string;
 
-  @Field(() => String, { name: 'userId' })
-  UserID!: string;
-
   @Field(() => Date, { name: 'added' })
   Added!: Date;
 

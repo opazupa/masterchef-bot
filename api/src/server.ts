@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import { createServer } from 'http';
 
 import { configuration } from './configuration';
+import { IContext } from './context';
 import { configureMongoDB } from './database';
 import { createBatchLoaders } from './dataloaders';
 import { createSchema } from './graphql';
@@ -30,8 +31,8 @@ const bootstrap = async () => {
     subscriptions: {
       path: '/subscriptions'
     },
-    context: {
-      loaders: createBatchLoaders
+    context: <IContext>{
+      loaders: createBatchLoaders()
     }
   });
   server.applyMiddleware({ app, path: '/graphql' });
