@@ -107,4 +107,5 @@ type User {
   userName: String!
   registered: DateTime!
   favourites: [Recipe!]
+  recipes: [Recipe!]
 }

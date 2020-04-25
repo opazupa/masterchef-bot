@@ -1,7 +1,7 @@
 import { ApolloError } from 'apollo-server-express';
 import { Args, FieldResolver, Query, Resolver, Root } from 'type-graphql';
 
-import { getFavouriteRecipes, getUser, getUsers, IRecipe, IUser } from '../../database/models';
+import { getFavouriteRecipes, getUser, getUserRecipes, getUsers, IRecipe, IUser } from '../../database/models';
 import { NOT_FOUND } from '../../errors';
 import { IdArg, Recipe, User } from '../types';
 
@@ -37,5 +37,14 @@ export class UserResolver {
   @FieldResolver((_type) => [Recipe], { defaultValue: [] })
   async favourites(@Root() user: IUser): Promise<IRecipe[]> {
     return await getFavouriteRecipes(user._id);
+  }
+
+  /**
+   * Fields
+   */
+
+  @FieldResolver((_type) => [Recipe], { defaultValue: [] })
+  async recipes(@Root() user: IUser): Promise<IRecipe[]> {
+    return await getUserRecipes(user._id);
   }
 }
