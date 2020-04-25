@@ -1,7 +1,8 @@
 import { ApolloError } from 'apollo-server-express';
-import { Args, FieldResolver, Query, Resolver, Root } from 'type-graphql';
+import { Args, Ctx, FieldResolver, Query, Resolver, Root } from 'type-graphql';
 
-import { getFavouriteRecipes, getUser, getUserRecipes, getUsers, IRecipe, IUser } from '../../database/models';
+import { getFavouriteRecipes, getUser, getUsers, IRecipe, IUser } from '../../database/models';
+import { IBatchLoaders } from '../../dataloaders';
 import { NOT_FOUND } from '../../errors';
 import { IdArg, Recipe, User } from '../types';
 
@@ -39,12 +40,8 @@ export class UserResolver {
     return await getFavouriteRecipes(user._id);
   }
 
-  /**
-   * Fields
-   */
-
   @FieldResolver((_type) => [Recipe], { defaultValue: [] })
-  async recipes(@Root() user: IUser): Promise<IRecipe[]> {
-    return await getUserRecipes(user._id);
+  async recipes(@Root() user: IUser, @Ctx() ctx: { loaders: IBatchLoaders }): Promise<IRecipe[]> {
+    return await ctx.loaders.user.recipes.load(user._id);
   }
 }

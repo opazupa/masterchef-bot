@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 import { RECIPE, RECIPE_COLLECTION, USER, USER_COLLECTION } from '../collections';
+import { IUser } from './user.model';
 
 /**
  * IRecipe document
@@ -73,11 +74,14 @@ const getRecipe = async (id: string): Promise<IRecipe | null> => {
 /**
  * Get recipes by user
  *
- * @param {string} userId
+ * @param {string[]} userIds
  * @returns {Promise<IRecipe[]>}
  */
-const getUserRecipes = async (userId: string): Promise<IRecipe[]> => {
-  return await Recipes.find({ UserID: userId });
+const getUserRecipes = async (userIds: string[]): Promise<Map<string, IRecipe[]>> => {
+  const recipes = await Recipes.find({ UserID: { $in: userIds } });
+  console.log(new Set(recipes.map((r) => r.UserID)));
+
+  return new Map(userIds.map((userId) => [userId, recipes.filter((r) => r.UserID.toString() === userId.toString())]));
 };
 
 /**
@@ -86,7 +90,7 @@ const getUserRecipes = async (userId: string): Promise<IRecipe[]> => {
  * @param {string} recipeId
  * @returns {Promise<any[]>}
  */
-const getFavouriters = async (recipeId: string): Promise<any[]> => {
+const getFavouriters = async (recipeId: string): Promise<IUser[]> => {
   return await Recipes.aggregate([
     {
       $match: {

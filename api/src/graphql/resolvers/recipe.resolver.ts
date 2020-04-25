@@ -120,7 +120,7 @@ export class RecipeResolver {
     filter: ({ payload, args }: ResolverFilterData<Recipe, RecipeTopicArgs>) => {
       console.log(payload, args);
       if (args.userId) {
-        return args.userId == payload.UserID;
+        return args.userId.toString() == payload.UserID.toString();
       }
       if (args.name) {
         return payload.Name.includes(args.name);

@@ -10,6 +10,7 @@ import { createServer } from 'http';
 
 import { configuration } from './configuration';
 import { configureMongoDB } from './database';
+import { createBatchLoaders } from './dataloaders';
 import { createSchema } from './graphql';
 
 const bootstrap = async () => {
@@ -28,6 +29,9 @@ const bootstrap = async () => {
     playground: configuration.enablePlayground,
     subscriptions: {
       path: '/subscriptions'
+    },
+    context: {
+      loaders: createBatchLoaders
     }
   });
   server.applyMiddleware({ app, path: '/graphql' });
