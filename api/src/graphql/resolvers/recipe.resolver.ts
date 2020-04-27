@@ -100,7 +100,7 @@ export class RecipeResolver {
   /**
    * Subscriptions
    */
-  // @Authorized()
+  @Authorized()
   @Subscription({
     topics: Topics.NewRecipe,
     filter: ({ payload, args }: ResolverFilterData<IRecipe, RecipeTopicArgs>) => {
@@ -121,6 +121,7 @@ export class RecipeResolver {
     return recipe;
   }
 
+  @Authorized()
   @Subscription({
     topics: Topics.UpdatedRecipe,
     filter: ({ payload, args }: ResolverFilterData<IRecipe, RecipeTopicArgs>) => {
@@ -141,6 +142,7 @@ export class RecipeResolver {
     return recipe;
   }
 
+  @Authorized()
   @Subscription({
     topics: Topics.DeletedRecipe,
     description: 'Notification on deleted recipes'

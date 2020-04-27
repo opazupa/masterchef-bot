@@ -9,7 +9,7 @@ import depthLimit from 'graphql-depth-limit';
 import helmet from 'helmet';
 import { createServer } from 'http';
 
-import { getUserFromToken } from './auth';
+import { getUserFromToken, getUserFromWSParams } from './auth';
 import { configuration } from './configuration';
 import { IContext } from './context';
 import { configureMongoDB } from './database';
@@ -44,13 +44,13 @@ const bootstrap = async () => {
     playground: configuration.enablePlayground,
     subscriptions: {
       path: WS_PATH,
-      onConnect: (connectionParams) => getUserFromToken(connectionParams)
+      onConnect: (connectionParams) => getUserFromWSParams(connectionParams)
     },
     context: async ({ req, connection }) => {
       return <IContext>{
         loaders: createBatchLoaders(),
         // Check if it's a websocket connection
-        user: connection ? connection.context.user : req.user
+        user: connection ? connection.context.user : getUserFromToken(req.user)
       };
     }
   });

@@ -8,21 +8,46 @@ import { IApiUser } from '../database/models';
 
 const AUTHORIZATION = 'Authorization';
 const BEARER_TOKEN_TYPE = 'Bearer';
+
+/**
+ * Interface for JWT token data
+ *
+ * @interface ITokenData
+ */
+interface ITokenData {
+  user: IContextUser;
+  exp: number;
+  iat?: number;
+}
+
 /**
  * Load user from authorization params
  *
  * @param {*} connectionParams
  * @returns
  */
-const getUserFromToken = (connectionParams: any) => {
+const getUserFromWSParams = (connectionParams: any) => {
   // Check for Authorization property
   if (connectionParams[AUTHORIZATION]) {
     // Load the received JWT token
-    return <IContext>{
-      user: jsonwebtoken.verify(connectionParams[AUTHORIZATION], configuration.jwtSecret)
-    };
+    const { user } = jsonwebtoken.verify(
+      connectionParams[AUTHORIZATION].split(' ')[1],
+      configuration.jwtSecret
+    ) as ITokenData;
+
+    return <IContext>{ user };
   }
   return null;
+};
+
+/**
+ * Load user from request user data
+ *
+ * @param {*} connectionParams
+ * @returns
+ */
+const getUserFromToken = (data: ITokenData): IContextUser | undefined => {
+  return data?.user;
 };
 
 /**
@@ -35,12 +60,12 @@ const createTokenForUser = (apiUser: IApiUser): { tokenType: string; token: stri
   const expiresIn = Math.floor(Date.now() / 1000) + 60 * 60;
   const token = jsonwebtoken.sign(
     {
-      data: <IContextUser>{
+      user: <IContextUser>{
         userName: apiUser.UserName,
         roles: apiUser.Roles
       },
       exp: expiresIn
-    },
+    } as ITokenData,
     configuration.jwtSecret
   );
 
@@ -80,6 +105,7 @@ const authChecker: AuthChecker<IContext> = ({ context: { user } }, roles) => {
   if (!user) {
     return false;
   }
+
   if (roles.length === 0 || user.roles.some((role) => roles.includes(role))) {
     // Grant access if the roles overlap
     return true;
@@ -88,4 +114,4 @@ const authChecker: AuthChecker<IContext> = ({ context: { user } }, roles) => {
   return false;
 };
 
-export { authChecker, getUserFromToken, createTokenForUser, verifyUser, hashPassword };
+export { authChecker, getUserFromWSParams, getUserFromToken, createTokenForUser, verifyUser, hashPassword };
