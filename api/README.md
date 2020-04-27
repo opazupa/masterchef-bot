@@ -6,7 +6,9 @@ This is the node `GraphQL` API for **Masterchef** recipes.
 - Typescript
 - Express
 - Apollo Server - GraphQL
+    - WS subscriptions
 - Mongoose
+- JWT bearer auth
 
 ## [Schema](./schema.gql)
 
