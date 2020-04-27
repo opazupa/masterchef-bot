@@ -16,3 +16,4 @@ This is the node `GraphQL` API for **Masterchef** recipes.
 | --- | --- |
 | `PORT`                | <port_number> for api to run on           |
 | `ENABLE_PLAYGROUND`   | `true/false` to enable graphql playground in `/grahpql`   |
+| `JWT_SECRET`          | <jwt_secret> for authentication         |

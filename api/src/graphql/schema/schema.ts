@@ -1,6 +1,7 @@
 import { GraphQLSchema } from 'graphql';
 import { buildSchema } from 'type-graphql';
 
+import { authChecker } from '../../auth/auth';
 import { RecipeResolver, UserResolver } from '../resolvers/';
 
 /**
@@ -11,7 +12,8 @@ import { RecipeResolver, UserResolver } from '../resolvers/';
 const createSchema: Promise<GraphQLSchema> = buildSchema({
   resolvers: [UserResolver, RecipeResolver],
   emitSchemaFile: true,
-  validate: true
+  validate: true,
+  authChecker: authChecker
 });
 
 export { createSchema };

@@ -11,6 +11,7 @@ interface IConfiguration {
   databaseConnection: string;
   databaseName: string;
   enablePlayground: boolean;
+  jwtSecret: string;
 }
 
 // Apply .env
@@ -26,5 +27,6 @@ export const configuration: IConfiguration = {
   debugMode: process.env.DEBUG_MODE === 'true',
   databaseConnection: <string>process.env.DATABASE_CONNECTION,
   databaseName: <string>process.env.DATABASE_NAME,
-  enablePlayground: process.env.ENABLE_PLAYGROUND === 'true'
+  enablePlayground: process.env.ENABLE_PLAYGROUND === 'true',
+  jwtSecret: <string>process.env.JWT_SECRET
 };

@@ -1,6 +1,7 @@
 import { ApolloError } from 'apollo-server-express';
 import {
   Args,
+  Authorized,
   Ctx,
   FieldResolver,
   ID,
@@ -15,7 +16,16 @@ import {
 } from 'type-graphql';
 
 import { IContext } from '../../context';
-import { addRecipe, deleteRecipe, getAllRecipes, getRecipe, IRecipe, IUser, updateRecipe } from '../../database/models';
+import {
+  addRecipe,
+  APIROLE,
+  deleteRecipe,
+  getAllRecipes,
+  getRecipe,
+  IRecipe,
+  IUser,
+  updateRecipe,
+} from '../../database/models';
 import { NOT_FOUND } from '../../errors';
 import { CreateRecipeArgs, IdArg, Recipe, UpdateRecipeArgs, User } from '../types';
 import { RecipeTopicArgs, Topics } from '../types/topics';
@@ -48,7 +58,7 @@ export class RecipeResolver {
   /**
    * Mutations
    */
-
+  @Authorized()
   @Mutation(() => Recipe, { description: 'Add recipe' })
   async addRecipe(
     @Args() { userId, recipe }: CreateRecipeArgs,
@@ -59,6 +69,7 @@ export class RecipeResolver {
     return added;
   }
 
+  @Authorized()
   @Mutation(() => Recipe, { description: 'Update recipe' })
   async updateRecipe(
     @Args() { id, recipe }: UpdateRecipeArgs,
@@ -72,6 +83,7 @@ export class RecipeResolver {
     return updated;
   }
 
+  @Authorized(APIROLE.ADMIN)
   @Mutation(() => ID, { description: 'Delete recipe' })
   async deleteRecipe(
     @Args() { id }: IdArg,
@@ -88,6 +100,7 @@ export class RecipeResolver {
   /**
    * Subscriptions
    */
+  // @Authorized()
   @Subscription({
     topics: Topics.NewRecipe,
     filter: ({ payload, args }: ResolverFilterData<IRecipe, RecipeTopicArgs>) => {
