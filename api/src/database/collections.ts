@@ -2,7 +2,7 @@
  *   Constants for mongo collections
  */
 
-export const API_USER_COLLECTION = 'apiUsers';
+export const API_USER_COLLECTION = 'apiusers';
 export const RECIPE_COLLECTION = 'recipes';
 export const USER_COLLECTION = 'users';
 

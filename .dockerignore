@@ -2,3 +2,4 @@
 *.yml
 .vscode/
 **/bin/
+**/node_modules/

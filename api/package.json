@@ -16,7 +16,7 @@
   "author": "Olli Saarinen",
   "license": "MIT",
   "devDependencies": {
-    "@types/bcrypt": "^3.0.0",
+    "@types/bcryptjs": "^2.4.2",
     "@types/compression": "^1.7.0",
     "@types/cors": "^2.8.6",
     "@types/dotenv": "^8.2.0",
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "apollo-server-express": "^2.12.0",
-    "bcrypt": "^4.0.1",
+    "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dataloader": "^2.0.0",

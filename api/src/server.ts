@@ -8,8 +8,8 @@ import jwt from 'express-jwt';
 import depthLimit from 'graphql-depth-limit';
 import helmet from 'helmet';
 import { createServer } from 'http';
-import jsonwebtoken from 'jsonwebtoken';
 
+import { getUserFromToken } from './auth';
 import { configuration } from './configuration';
 import { IContext } from './context';
 import { configureMongoDB } from './database';
@@ -44,18 +44,12 @@ const bootstrap = async () => {
     playground: configuration.enablePlayground,
     subscriptions: {
       path: WS_PATH,
-      onConnect: (connectionParams: any) => {
-        if (connectionParams.Authorization) {
-          return <IContext>{
-            user: jsonwebtoken.verify(connectionParams.Authorization, configuration.jwtSecret)
-          };
-        }
-        return null;
-      }
+      onConnect: (connectionParams) => getUserFromToken(connectionParams)
     },
     context: async ({ req, connection }) => {
       return <IContext>{
         loaders: createBatchLoaders(),
+        // Check if it's a websocket connection
         user: connection ? connection.context.user : req.user
       };
     }
@@ -64,7 +58,6 @@ const bootstrap = async () => {
 
   // Setup DB
   configureMongoDB();
-
   const httpServer = createServer(app);
   server.installSubscriptionHandlers(httpServer);
   httpServer.on('error', (e) => console.error(e));
