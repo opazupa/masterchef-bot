@@ -8,6 +8,8 @@ import jwt from 'express-jwt';
 import depthLimit from 'graphql-depth-limit';
 import helmet from 'helmet';
 import { createServer } from 'http';
+import path from 'path';
+import favicon from 'serve-favicon';
 
 import { getUserFromToken, getUserFromWSParams } from './auth';
 import { configuration } from './configuration';
@@ -26,6 +28,12 @@ const bootstrap = async () => {
   app.disable('x-powered-by');
   app.use('*', cors());
   app.use(compression());
+
+  // Add home page
+  app.use(favicon(__dirname + '/public/favicon.ico'));
+  app.get('/', (_req, res) => {
+    res.sendFile(path.join(__dirname + '/public/index.html'));
+  });
 
   // Apply JWT middleware
   app.use(

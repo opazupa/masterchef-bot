@@ -29,6 +29,8 @@ services:
       - '3000:3000'
     environment: 
       PORT: 3000
+      JWT_SECRET: "prod-secret34344"
+      ENABLE_PLAYGROUND: "true"
     networks: 
       - api
 

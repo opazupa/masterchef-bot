@@ -6,7 +6,7 @@
   "scripts": {
     "start:dev": "npm run build:dev",
     "build:dev": "nodemon 'src/server.ts' --exec 'ts-node' src/server.ts -e ts",
-    "build": "rm -rf ./dist && tsc",
+    "build": "rm -rf ./dist && tsc && cp -R ./src/public ./dist",
     "start": "node dist/server.js"
   },
   "keywords": [],
@@ -29,6 +29,7 @@
     "@types/lodash": "^4.14.150",
     "@types/mongoose": "^5.7.12",
     "@types/node": "^13.13.2",
+    "@types/serve-favicon": "^2.5.0",
     "graphql-depth-limit": "^1.1.0",
     "graphql-import": "^1.0.2",
     "graphql-import-node": "0.0.4",
@@ -53,6 +54,7 @@
     "mongoose": "^5.9.10",
     "ncp": "^2.0.0",
     "reflect-metadata": "^0.1.13",
+    "serve-favicon": "^2.5.0",
     "type-graphql": "^0.17.6"
   }
 }
