@@ -1,1 +1,1 @@
-export * from './IContext';
+export * from './context.interface';
