@@ -2,6 +2,7 @@ FROM node:10.15.0-alpine
 WORKDIR /app
 COPY package*.json /app/
 RUN npm ci --production
+RUN npm i -g typescript
 COPY ./ /app/
 
 RUN npm run build
