@@ -35,7 +35,7 @@ const getUserFromWSParams = (connectionParams: any) => {
       configuration.jwtSecret
     ) as ITokenData;
 
-    return <IContext>{ user };
+    return { user } as IContext;
   }
   return null;
 };
@@ -60,10 +60,10 @@ const createTokenForUser = (apiUser: IApiUser): { tokenType: string; token: stri
   const expiresIn = Math.floor(Date.now() / 1000) + 60 * 60;
   const token = jsonwebtoken.sign(
     {
-      user: <IContextUser>{
+      user: {
         userName: apiUser.UserName,
         roles: apiUser.Roles
-      },
+      } as IContextUser,
       exp: expiresIn
     } as ITokenData,
     configuration.jwtSecret

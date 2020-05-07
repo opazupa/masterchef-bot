@@ -45,6 +45,7 @@ export class RecipeResolver {
   @Query((_returns) => Recipe, { description: 'Get Recipe by id', nullable: true })
   async recipe(@Args() { id }: IdArg): Promise<IRecipe | null> {
     return await getRecipe(id).catch((e) => {
+      // tslint:disable-next-line: no-console
       console.error(e);
       throw new ApolloError(`Recipe not found with id ${id}`, NOT_FOUND);
     });
@@ -76,6 +77,7 @@ export class RecipeResolver {
     @PubSub(Topics.UpdatedRecipe) updatedRecipeNotification: Publisher<Recipe>
   ) {
     const updated = await updateRecipe(id, recipe.name, recipe.url).catch((e) => {
+      // tslint:disable-next-line: no-console
       console.error(e);
       throw new ApolloError(`Recipe not found with id ${id}`, NOT_FOUND);
     });
@@ -90,6 +92,7 @@ export class RecipeResolver {
     @PubSub(Topics.DeletedRecipe) deletedRecipeNotification: Publisher<string>
   ) {
     await deleteRecipe(id).catch((e) => {
+      // tslint:disable-next-line: no-console
       console.error(e);
       throw new ApolloError(`Recipe not found with id ${id}`, NOT_FOUND);
     });
@@ -105,7 +108,7 @@ export class RecipeResolver {
     topics: Topics.NewRecipe,
     filter: ({ payload, args }: ResolverFilterData<IRecipe, RecipeTopicArgs>) => {
       if (args.userId) {
-        return args.userId == payload.UserID;
+        return args.userId.toString() === payload.UserID.toString();
       }
       if (args.name) {
         return payload.Name.includes(args.name);
@@ -126,7 +129,7 @@ export class RecipeResolver {
     topics: Topics.UpdatedRecipe,
     filter: ({ payload, args }: ResolverFilterData<IRecipe, RecipeTopicArgs>) => {
       if (args.userId) {
-        return args.userId.toString() == payload.UserID.toString();
+        return args.userId.toString() === payload.UserID.toString();
       }
       if (args.name) {
         return payload.Name.includes(args.name);
@@ -167,6 +170,7 @@ export class RecipeResolver {
   @FieldResolver((_type) => User, { description: 'User who added the recipe' })
   async user(@Root() recipe: IRecipe, @Ctx() ctx: IContext): Promise<IUser | null> {
     return await ctx.loaders.recipe.user.load(recipe.UserID).catch((e) => {
+      // tslint:disable-next-line: no-console
       console.error(e);
       throw new ApolloError(`User not found with id ${recipe.UserID}`, NOT_FOUND);
     });

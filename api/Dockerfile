@@ -6,6 +6,7 @@ RUN npm i typescript
 COPY ./ /app/
 
 RUN npm run build
+RUN npm run tslint
 
 ENV NODE_ENV=production
 

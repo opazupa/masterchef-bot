@@ -17,6 +17,7 @@ export class AuthResolver {
   @Mutation(() => Auth, { description: 'Login' })
   async login(@Arg('user') login: LoginInputType): Promise<Auth> {
     const user = await getApiUser(login.userName).catch((e) => {
+      // tslint:disable-next-line: no-console
       console.error(e);
       throw new ApolloError(`User not found with username ${login.userName}`, NOT_FOUND);
     });
@@ -28,6 +29,6 @@ export class AuthResolver {
 
     // Create token for the user
     const { tokenType, token, expiresIn } = createTokenForUser(user!);
-    return <Auth>{ userName: user!.UserName, tokenType, token, expiresIn };
+    return { userName: user!.UserName, tokenType, token, expiresIn } as Auth;
   }
 }

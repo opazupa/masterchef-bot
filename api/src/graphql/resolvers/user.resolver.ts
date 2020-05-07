@@ -21,6 +21,7 @@ export class UserResolver {
   @Query((_returns) => User, { nullable: true, description: 'Get user by id' })
   async user(@Args() { id }: IdArg): Promise<IUser | null> {
     return await getUser(id).catch((e) => {
+      // tslint:disable-next-line: no-console
       console.error(e);
       throw new ApolloError(`Recipe not found with id ${id}`, NOT_FOUND);
     });

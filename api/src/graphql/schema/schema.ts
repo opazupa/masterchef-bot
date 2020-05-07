@@ -13,7 +13,7 @@ const createSchema: Promise<GraphQLSchema> = buildSchema({
   resolvers: [UserResolver, RecipeResolver, AuthResolver],
   emitSchemaFile: true,
   validate: true,
-  authChecker: authChecker
+  authChecker
 });
 
 export { createSchema };

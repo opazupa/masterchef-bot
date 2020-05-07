@@ -55,11 +55,11 @@ const bootstrap = async () => {
       onConnect: (connectionParams) => getUserFromWSParams(connectionParams)
     },
     context: async ({ req, connection }) => {
-      return <IContext>{
+      return {
         loaders: createBatchLoaders(),
         // Check if it's a websocket connection
         user: connection ? connection.context.user : getUserFromToken(req.user)
-      };
+      } as IContext;
     }
   });
   server.applyMiddleware({ app, path: API_PATH });
@@ -68,6 +68,8 @@ const bootstrap = async () => {
   configureMongoDB();
   const httpServer = createServer(app);
   server.installSubscriptionHandlers(httpServer);
+
+  // tslint:disable: no-console
   httpServer.on('error', (e) => console.error(e));
   httpServer.listen({ port: configuration.port }, () => {
     console.log(`🚀 Test api is running on port ${configuration.port}`);
