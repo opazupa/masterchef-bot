@@ -21,8 +21,7 @@ type Recipe struct {
 }
 
 const (
-	recipeapi  = "https://duckduckgo.com"
-	linkPrefix = 15
+	recipeapi = "https://duckduckgo.com"
 )
 
 // SearchRecipes from duckduckgo API
@@ -82,8 +81,9 @@ func parseDuckDuckGoRecipes(html *goquery.Document) *[]Recipe {
 // Parse and decode URL
 func parseURL(encodedURL string) string {
 	decodedURL, _ := url.QueryUnescape(encodedURL)
+	regex := regexp.MustCompile(`(https).*`)
 	// Remove link prefix
-	return decodedURL[linkPrefix:]
+	return regex.FindString(decodedURL)
 }
 
 // Parse whitespaces

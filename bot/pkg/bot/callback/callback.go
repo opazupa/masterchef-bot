@@ -141,6 +141,7 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 			replyMessage = fmt.Sprintf("Recipe saved 😛")
 		} else {
 			replyMessage = fmt.Sprintf("Failed to save the recipe 😕")
+			break
 		}
 		nextAction = getNextAction(action, err, update.CallbackQuery, recipe.ID.Hex())
 
