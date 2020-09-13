@@ -16,7 +16,7 @@ dev-up: 	## Spin up dev environment and rebuild images
 	docker-compose up --build
 dev-down: 	## Shut down dev environment 
 	docker-compose down
-dev-clean: 	## Clean dev envirnment with services and volumes
+dev-clean: 	## Clean dev environment with services and volumes
 	docker-compose down --remove-orphans --volumes
 
 # Prod environment 

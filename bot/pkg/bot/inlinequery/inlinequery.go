@@ -6,6 +6,9 @@ import (
 	"strconv"
 	"strings"
 
+	selection "masterchef_bot/pkg/database/selectedrecipecollection"
+	"masterchef_bot/pkg/database/usercollection"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -28,6 +31,13 @@ func Handle(update *tgbotapi.Update, isRegistered bool) *[]interface{} {
 	return toInlineQueryResult(results, isRegistered)
 }
 
+// SaveSelectedRecipe from inlinequery
+func SaveSelectedRecipe(update *tgbotapi.Update, user *usercollection.User) {
+
+	recipeName, recipeURL := getRecipeInfo(update)
+	selection.Save(recipeName, recipeURL, update.Message.Chat.ID, user.ID)
+}
+
 // IsRecipe an selected inlinequery recipe
 func IsRecipe(update *tgbotapi.Update) bool {
 
@@ -41,8 +51,8 @@ func IsRecipe(update *tgbotapi.Update) bool {
 	return false
 }
 
-// GetRecipeInfo for an selected inlinequery recipe
-func GetRecipeInfo(update *tgbotapi.Update) (name string, url string) {
+// getRecipeInfo for an selected inlinequery recipe
+func getRecipeInfo(update *tgbotapi.Update) (name string, url string) {
 	recipeResultParts := strings.Split(update.Message.Text, "\n")
 	return strings.TrimSpace(recipeResultParts[namePosition]), strings.TrimSpace(recipeResultParts[urlPosition])
 }
