@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 
+import * as Sentry from '@sentry/node';
 import { ApolloServer } from 'apollo-server-express';
 import compression from 'compression';
 import cors from 'cors';
@@ -16,7 +17,7 @@ import { configuration } from './configuration';
 import { IContext } from './context';
 import { configureMongoDB } from './database';
 import { createBatchLoaders } from './dataloaders';
-import { createSchema } from './graphql';
+import { createSchema, sentryPlugin } from './graphql';
 
 const API_PATH = '/graphql';
 const WS_PATH = '/subscriptions';
@@ -44,12 +45,19 @@ const bootstrap = async () => {
     })
   );
 
+  Sentry.init({
+    dsn: configuration.sentryDsn,
+    environment: configuration.sentryEnv,
+    debug: configuration.debugMode
+  });
+
   // Setup GraphQL server
   const server = new ApolloServer({
     schema: await createSchema,
     validationRules: [depthLimit(7)],
     introspection: configuration.enablePlayground,
     playground: configuration.enablePlayground,
+    plugins: [sentryPlugin],
     subscriptions: {
       path: WS_PATH,
       onConnect: (connectionParams) => getUserFromWSParams(connectionParams)

@@ -33,6 +33,11 @@ services:
       PORT: 3000
       JWT_SECRET: "prod-secret34344"
       ENABLE_PLAYGROUND: "true"
+      DATABASE_NAME: "${DATABASE_NAME}"
+      DATABASE_CONNECTION: "${DATABASE_CONNECTION}"
+      SENTRY_DSN: "${SENTRY_DSN}"
+      SENTRY_ENVIRONMENT: "${SENTRY_ENVIRONMENT}"
+
     networks: 
       - api
 

@@ -1,9 +1,8 @@
-import { ApolloError } from 'apollo-server-express';
+import { AuthenticationError } from 'apollo-server-express';
 import { Arg, Mutation, Resolver } from 'type-graphql';
 
 import { createTokenForUser, verifyUser } from '../../auth';
 import { getApiUser } from '../../database/models';
-import { NOT_FOUND, UN_AUTHORIZED } from '../../errors';
 import { Auth, LoginInputType } from '../types';
 
 /**
@@ -19,12 +18,12 @@ export class AuthResolver {
     const user = await getApiUser(login.userName).catch((e) => {
       // tslint:disable-next-line: no-console
       console.error(e);
-      throw new ApolloError(`User not found with username ${login.userName}`, NOT_FOUND);
+      throw new AuthenticationError(`User not found with username ${login.userName}`);
     });
 
-    // Verify hashed pasword
+    // Verify hashed password
     if (!(await verifyUser(user!, login.password))) {
-      throw new ApolloError(`Credentieals doesn't match`, UN_AUTHORIZED);
+      throw new AuthenticationError(`Credentials doesn't match`);
     }
 
     // Create token for the user

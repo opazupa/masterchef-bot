@@ -12,6 +12,8 @@ interface IConfiguration {
   databaseName: string;
   enablePlayground: boolean;
   jwtSecret: string;
+  sentryDsn: string;
+  sentryEnv: string;
 }
 
 // Apply .env
@@ -28,5 +30,7 @@ export const configuration: IConfiguration = {
   databaseConnection: process.env.DATABASE_CONNECTION as string,
   databaseName: process.env.DATABASE_NAME as string,
   enablePlayground: process.env.ENABLE_PLAYGROUND === 'true',
-  jwtSecret: process.env.JWT_SECRET as string
+  jwtSecret: process.env.JWT_SECRET as string,
+  sentryDsn: process.env.SENTRY_DSN as string,
+  sentryEnv: process.env.SENTRY_ENVIRONMENT || (process.env.NODE_ENV as string)
 };

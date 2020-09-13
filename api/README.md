@@ -16,8 +16,10 @@ This is the node `GraphQL` API for **Masterchef** recipes.
 ## Configuration 🔧
 | Key | Value |
 | --- | --- |
-| `PORT`                | <port_number> for api to run on           |
-| `DATABASE_CONNECTION` | <your_mongo_connection> to connect to mongo server |
-| `DATABASE_NAME`       | <your_db_name> to use in mongo server              | 
+| `PORT`                | <port_number> for api to run on                           |
+| `DATABASE_CONNECTION` | <your_mongo_connection> to connect to mongo server        |
+| `DATABASE_NAME`       | <your_db_name> to use in mongo server                     | 
 | `ENABLE_PLAYGROUND`   | `true/false` to enable graphql playground in `/grahpql`   |
-| `JWT_SECRET`          | <jwt_secret> for authentication         |
+| `JWT_SECRET`          | <jwt_secret> for authentication                           |
+| `SENTRY_DSN`          | <your_dsn> to use with sentry                             | 
+| `SENTRY_ENVIRONMENT`  | <your_sentry_env> to use with sentry                      |
