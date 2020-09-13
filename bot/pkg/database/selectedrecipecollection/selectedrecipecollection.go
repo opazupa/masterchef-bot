@@ -5,6 +5,7 @@ import (
 	"masterchef_bot/pkg/database"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -42,6 +43,7 @@ func Save(name string, url string, chatID int64, userID primitive.ObjectID) (err
 	// Try to update if the exsiting user and chat is found
 	res := database.Manager.Get(database.SelectedRecipes).FindOneAndUpdate(*database.Manager.GetContext(), userFilter, update, &opt)
 	if err = res.Err(); err != nil {
+		sentry.CaptureException(err)
 		log.Print(res.Err())
 	}
 	return
@@ -63,6 +65,7 @@ func GetByUser(userID primitive.ObjectID) (recipe *SelectedRecipe) {
 
 	err := database.Manager.Get(database.SelectedRecipes).FindOne(*database.Manager.GetContext(), filter, opt).Decode(recipe)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Print(err)
 		recipe = nil
 	}

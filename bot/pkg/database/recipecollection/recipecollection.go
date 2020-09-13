@@ -8,6 +8,7 @@ import (
 	templates "masterchef_bot/pkg/helpers"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -49,6 +50,7 @@ func Add(recipe *selectedrecipecollection.SelectedRecipe) (addedRecipe *Recipe, 
 
 	inserted, err := database.Manager.Get(database.Recipes).InsertOne(*database.Manager.GetContext(), newRecipe)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Print(err)
 		return
 	}
@@ -90,6 +92,7 @@ func GetByUser(userID primitive.ObjectID) (recipes *[]FavouriteRecipe) {
 	ctx := *database.Manager.GetContext()
 	cursor, err := database.Manager.Get(database.Recipes).Aggregate(ctx, pipeline)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Print(err)
 		return
 	}

@@ -5,6 +5,7 @@ import (
 	"log"
 	"masterchef_bot/pkg/configuration"
 
+	"github.com/getsentry/sentry-go"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -31,6 +32,7 @@ func init() {
 	client, err := mongo.NewClient(clientOptions)
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Panic(err)
 	}
 
@@ -39,12 +41,15 @@ func init() {
 	// Check connections
 	err = client.Connect(ctx)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Fatal(err)
 	}
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Fatal("Couldn't connect to the database", err)
 	} else {
+		sentry.CaptureException(err)
 		log.Printf("Connected to the [%s] database.", configuration.DatabaseName)
 	}
 	Manager = &manager{db: client.Database(configuration.DatabaseName), ctx: &ctx}

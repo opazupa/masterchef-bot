@@ -10,6 +10,7 @@ import (
 	selection "masterchef_bot/pkg/database/selectedrecipecollection"
 	"masterchef_bot/pkg/database/usercollection"
 
+	"github.com/getsentry/sentry-go"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/thoas/go-funk"
 )
@@ -113,6 +114,7 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 		if err == nil {
 			replyMessage = fmt.Sprintf("User [%s] registered 🔥", newUser.UserName)
 		} else {
+			sentry.CaptureException(err)
 			replyMessage = fmt.Sprintf("Failed to register user [%s]", update.CallbackQuery.From.UserName)
 		}
 
@@ -140,6 +142,7 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 		if err == nil {
 			replyMessage = fmt.Sprintf("Recipe saved 😛")
 		} else {
+			sentry.CaptureException(err)
 			replyMessage = fmt.Sprintf("Failed to save the recipe 😕")
 			break
 		}
@@ -161,6 +164,7 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 
 		added, err := user.AddFavourite(funk.Head(targetIDs).(string))
 		if err != nil {
+			sentry.CaptureException(err)
 			replyMessage = "Something went wrong when saving favourite recipe 🧐"
 			break
 		}
@@ -186,6 +190,7 @@ func Handle(update *tgbotapi.Update, user *usercollection.User) (replyMessage st
 
 		_, err := user.RemoveFavourite(funk.Head(targetIDs).(string))
 		if err != nil {
+			sentry.CaptureException(err)
 			replyMessage = "Something went wrong when removing favourite recipe 🧐"
 			break
 		}
@@ -234,6 +239,7 @@ func getActionInfo(callbackQuery *tgbotapi.CallbackQuery) (actionID int, otherID
 	actionID, err := strconv.Atoi(actionParts[actionIDPosition])
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Println(err)
 	}
 	return

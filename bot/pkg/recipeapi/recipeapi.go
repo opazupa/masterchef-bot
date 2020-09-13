@@ -11,6 +11,7 @@ import (
 	templates "masterchef_bot/pkg/helpers"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/getsentry/sentry-go"
 )
 
 // Recipe object
@@ -30,6 +31,7 @@ func SearchRecipes(recipe string) (recipes *[]Recipe) {
 	// Get search results from duckduckgo
 	html, err := getDuckDuckGoSearchResult(recipe)
 	if err != nil {
+		sentry.CaptureException(err)
 		return &[]Recipe{}
 	}
 	// Parse results to Recipes
@@ -46,6 +48,7 @@ func getDuckDuckGoSearchResult(query string) (html *goquery.Document, err error)
 
 	response, err := http.Get(fmt.Sprintf("%s/html/?q=%s+recipe", recipeapi, url.QueryEscape(query)))
 	if err != nil || response.StatusCode != http.StatusOK {
+		sentry.CaptureException(err)
 		log.Printf("Failed to get search results from duckduckgo. %s", err)
 		return nil, err
 	}
@@ -54,6 +57,7 @@ func getDuckDuckGoSearchResult(query string) (html *goquery.Document, err error)
 	// Load the HTML document
 	html, err = goquery.NewDocumentFromReader(response.Body)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Printf("Failed to parse search results from duckduckgo. %s", err)
 	}
 	return

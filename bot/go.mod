@@ -5,12 +5,11 @@ go 1.13
 require (
 	github.com/DataDog/zstd v1.4.4 // indirect
 	github.com/PuerkitoBio/goquery v1.5.0
+	github.com/getsentry/sentry-go v0.7.0
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/joho/godotenv v1.3.0
-	github.com/pkg/errors v0.8.1 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/thoas/go-funk v0.6.0
 	github.com/tidwall/pretty v1.0.0 // indirect

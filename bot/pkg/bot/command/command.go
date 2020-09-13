@@ -9,6 +9,7 @@ import (
 	"masterchef_bot/pkg/database/recipecollection"
 	"masterchef_bot/pkg/database/usercollection"
 
+	"github.com/getsentry/sentry-go"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/thoas/go-funk"
 )
@@ -119,6 +120,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 
 	if !found {
 		err = fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
+		sentry.CaptureException(err)
 		log.Print(err)
 	}
 
@@ -147,6 +149,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 			messages = append(messages, message)
 		} else {
 			err = fmt.Errorf("No recipes returned for the random one")
+			sentry.CaptureException(err)
 		}
 
 	/*

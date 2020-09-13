@@ -19,3 +19,5 @@ I'm a **`MasterChefBot`** and ready to help you in the kitchen!
 | `DEBUG_MODE`          | true/false to enable detailed logging etc.         |
 | `DATABASE_CONNECTION` | <your_mongo_connection> to connect to mongo server |
 | `DATABASE_NAME`       | <your_db_name> to use in mongo server              | 
+| `SENTRY_DSN`          | <your_dsn> to use with sentry                      | 
+| `SENTRY_ENVIRONMENT`  | <your_sentry_env> to use with sentry               |

@@ -5,6 +5,7 @@ import (
 	"masterchef_bot/pkg/database"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -34,6 +35,7 @@ func Create(userName string, id int) (user *User, err error) {
 
 	inserted, err := database.Manager.Get(database.Users).InsertOne(*database.Manager.GetContext(), newUser)
 	if err != nil {
+		sentry.CaptureException(err)
 		return
 	}
 	user, err = getByID(inserted.InsertedID.(primitive.ObjectID))
@@ -49,6 +51,7 @@ func getByID(id primitive.ObjectID) (user *User, err error) {
 	}
 	err = database.Manager.Get(database.Users).FindOne(*database.Manager.GetContext(), filter).Decode(user)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Print(err)
 		user = nil
 	}
@@ -69,6 +72,7 @@ func GetByUserName(userName *string) (user *User) {
 
 	err := database.Manager.Get(database.Users).FindOne(*database.Manager.GetContext(), filter).Decode(user)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Print(err)
 		user = nil
 	}
@@ -80,6 +84,7 @@ func (user *User) AddFavourite(recipeID string) (added bool, err error) {
 
 	objID, err := primitive.ObjectIDFromHex(recipeID)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Print(err)
 		return
 	}
@@ -100,6 +105,7 @@ func (user *User) AddFavourite(recipeID string) (added bool, err error) {
 	// Try to update if the exsiting user
 	opts, err := database.Manager.Get(database.Users).UpdateOne(*database.Manager.GetContext(), userFilter, update)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Print(err)
 	}
 	added = opts.ModifiedCount != 0
@@ -111,6 +117,7 @@ func (user *User) RemoveFavourite(recipeID string) (removed bool, err error) {
 
 	objID, err := primitive.ObjectIDFromHex(recipeID)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Print(err)
 		return
 	}

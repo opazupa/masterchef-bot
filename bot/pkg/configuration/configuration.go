@@ -11,6 +11,8 @@ type Configuration struct {
 	DebugMode          bool
 	DatabaseConnection string
 	DatabaseName       string
+	SentryDsn          string
+	SentryEnv          string
 }
 
 // Get configuration
@@ -19,7 +21,9 @@ func Get() *Configuration {
 		APIKey:             getEnv("BOT_API_KEY", ""),
 		DebugMode:          getEnvAsBool("DEBUG_MODE", false),
 		DatabaseConnection: getEnv("DATABASE_CONNECTION", ""),
-		DatabaseName:       getEnv("DATABASE_NAME", " "),
+		DatabaseName:       getEnv("DATABASE_NAME", ""),
+		SentryDsn:          getEnv("SENTRY_DSN", ""),
+		SentryEnv:          getEnv("SENTRY_ENVIRONMENT", ""),
 	}
 }
 

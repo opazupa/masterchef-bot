@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"time"
 
+	"github.com/getsentry/sentry-go"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
 	"github.com/thoas/go-funk"
@@ -31,14 +34,32 @@ func main() {
 func configureBot() *tgbotapi.BotAPI {
 
 	configuration := configuration.Get()
+
+	// Configure sentry
+	configureSentry(configuration)
+
+	// Configure bot
 	bot, err := tgbotapi.NewBotAPI(configuration.APIKey)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Panic(err)
 	}
 	bot.Debug = configuration.DebugMode
 
 	log.Printf("Fired up %s 🔥🔥🔥", bot.Self.UserName)
 	return bot
+}
+
+// Configure sentry.io 🔥😈
+func configureSentry(configuration *configuration.Configuration) {
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn:         configuration.SentryDsn,
+		Debug:       configuration.DebugMode,
+		Environment: configuration.SentryEnv,
+	})
+	if err != nil {
+		log.Fatalf("sentry.Init: %s", err)
+	}
 }
 
 // Handle received updates
@@ -49,6 +70,7 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 
 	updates, err := bot.GetUpdatesChan(u)
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Printf("Failed to get update feed.")
 	}
 
@@ -88,10 +110,14 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 			// When user enters a command
 			messages, err := command.Handle(&update, bot.Self.UserName, user)
 			if err == nil {
+				sentry.CaptureException(err)
 				funk.ForEach(*messages, func(message tgbotapi.MessageConfig) { bot.Send(message) })
 			}
 		}
 	}
+
+	// Flush buffered events before the program terminates.
+	defer sentry.Flush(2 * time.Second)
 }
 
 // Get username from the update
@@ -106,6 +132,7 @@ func getUser(update tgbotapi.Update) (id *string) {
 	} else if update.EditedMessage != nil {
 		return &update.EditedMessage.From.UserName
 	} else {
+		sentry.CaptureMessage(fmt.Sprint("Unable to find username from update", update))
 		log.Print("Unable to find username from update", update)
 		return nil
 	}
