@@ -75,11 +75,11 @@ const getRecipe = async (id: string): Promise<IRecipe | null> => {
  * Get recipes by ids
  *
  * @param {string[]} ids
- * @returns {(Promise<Map<string, IRecipe | null>>)}
+ * @returns {(Promise<Map<string, IRecipe>>)}
  */
-const getRecipes = async (ids: string[]): Promise<Map<string, IRecipe | null>> => {
+const getRecipes = async (ids: string[]): Promise<Map<string, IRecipe>> => {
   const recipes = await Recipes.find({ _id: { $in: ids } });
-  return new Map(ids.map((id) => [id, recipes.find((r) => r._id.toString() === id.toString()) || null]));
+  return new Map(recipes.map((recipe) => [recipe.id, recipe]));
 };
 
 /**
@@ -141,7 +141,7 @@ const updateRecipe = async (id: string, name: string, url: string): Promise<IRec
       URL: url
     }
   );
-  return await Recipes.findById(id);
+  return await getRecipe(id);
 };
 
 /**

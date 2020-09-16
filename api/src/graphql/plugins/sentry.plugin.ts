@@ -1,12 +1,16 @@
 import * as Sentry from '@sentry/node';
+import { PluginDefinition } from 'apollo-server-core';
 import { ApolloError } from 'apollo-server-express';
+import { GraphQLRequestContextDidEncounterErrors } from 'apollo-server-plugin-base';
+
+import { IContext } from '../../context';
 
 export const sentryPlugin = {
   requestDidStart(_: any) {
     /* Within this returned object, define functions that respond
     to request-specific lifecycle events. */
     return {
-      didEncounterErrors(ctx: any) {
+      didEncounterErrors(ctx: GraphQLRequestContextDidEncounterErrors<IContext>) {
         // If we couldn't parse the operation, don't
         // do anything here
         if (!ctx.operation) {
@@ -16,14 +20,14 @@ export const sentryPlugin = {
         for (const err of ctx.errors) {
           // Only report internal server errors,
           // all errors extending ApolloError should be user-facing
-          if (err instanceof ApolloError) {
+          if (err.originalError instanceof ApolloError) {
             continue;
           }
 
           // Add scoped report details and send to Sentry
           Sentry.withScope((scope) => {
             // Annotate whether failing operation was query/mutation/subscription
-            scope.setTag('kind', ctx.operation.operation);
+            scope.setTag('kind', ctx.operation!.operation);
 
             // Log query and variables as extras (make sure to strip out sensitive data!)
             if (ctx.context.user) {
@@ -47,4 +51,4 @@ export const sentryPlugin = {
       }
     };
   }
-};
+} as PluginDefinition;

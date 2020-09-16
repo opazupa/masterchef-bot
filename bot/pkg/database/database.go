@@ -49,7 +49,6 @@ func init() {
 		sentry.CaptureException(err)
 		log.Fatal("Couldn't connect to the database", err)
 	} else {
-		sentry.CaptureException(err)
 		log.Printf("Connected to the [%s] database.", configuration.DatabaseName)
 	}
 	Manager = &manager{db: client.Database(configuration.DatabaseName), ctx: &ctx}

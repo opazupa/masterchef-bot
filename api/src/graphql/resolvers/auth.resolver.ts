@@ -15,15 +15,11 @@ import { Auth, LoginInputType } from '../types';
 export class AuthResolver {
   @Mutation(() => Auth, { description: 'Login' })
   async login(@Arg('user') login: LoginInputType): Promise<Auth> {
-    const user = await getApiUser(login.userName).catch((e) => {
-      // tslint:disable-next-line: no-console
-      console.error(e);
-      throw new AuthenticationError(`User not found with username ${login.userName}`);
-    });
+    const user = await getApiUser(login.userName);
 
-    // Verify hashed password
-    if (!(await verifyUser(user!, login.password))) {
-      throw new AuthenticationError(`Credentials doesn't match`);
+    // Verify user and hashed password
+    if (!user || !(await verifyUser(user!, login.password))) {
+      throw new AuthenticationError(`No user found or wrong password`);
     }
 
     // Create token for the user

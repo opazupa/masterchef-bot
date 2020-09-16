@@ -120,7 +120,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 
 	if !found {
 		err = fmt.Errorf("Unregocnized command %s from user [%s]", update.Message.Command(), update.Message.From.UserName)
-		sentry.CaptureException(err)
+		sentry.CaptureMessage(err.Error())
 		log.Print(err)
 	}
 
@@ -149,7 +149,7 @@ func Handle(update *tgbotapi.Update, botName string, user *usercollection.User) 
 			messages = append(messages, message)
 		} else {
 			err = fmt.Errorf("No recipes returned for the random one")
-			sentry.CaptureException(err)
+			sentry.CaptureMessage(err.Error())
 		}
 
 	/*

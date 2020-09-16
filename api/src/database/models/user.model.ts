@@ -46,11 +46,11 @@ const getAllUsers = async (): Promise<IUser[]> => {
  * Get users by ids
  *
  * @param {string[]} ids
- * @returns {(Promise<Map<string, IUser | null>>)}
+ * @returns {(Promise<Map<string, IUser>>)}
  */
-const getUsers = async (ids: string[]): Promise<Map<string, IUser | null>> => {
+const getUsers = async (ids: string[]): Promise<Map<string, IUser>> => {
   const users = await Users.find({ _id: { $in: ids } });
-  return new Map(ids.map((id) => [id, users.find((r) => r._id.toString() === id.toString()) || null]));
+  return new Map(users.map((user) => [user.id, user]));
 };
 
 /**

@@ -80,7 +80,7 @@ const bootstrap = async () => {
   // tslint:disable: no-console
   httpServer.on('error', (e) => console.error(e));
   httpServer.listen({ port: configuration.port }, () => {
-    console.log(`🚀 Test api is running on port ${configuration.port}`);
+    console.log(`🚀 Api is running on port ${configuration.port}`);
   });
 };
 

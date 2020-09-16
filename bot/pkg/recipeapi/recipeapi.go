@@ -31,7 +31,6 @@ func SearchRecipes(recipe string) (recipes *[]Recipe) {
 	// Get search results from duckduckgo
 	html, err := getDuckDuckGoSearchResult(recipe)
 	if err != nil {
-		sentry.CaptureException(err)
 		return &[]Recipe{}
 	}
 	// Parse results to Recipes
