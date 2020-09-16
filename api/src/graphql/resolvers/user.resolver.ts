@@ -23,7 +23,7 @@ export class UserResolver {
     return await getUser(id).catch((e) => {
       // tslint:disable-next-line: no-console
       console.error(e);
-      throw new ApolloError(`Recipe not found with id ${id}`, NOT_FOUND);
+      throw new ApolloError(`User not found with id ${id}`, NOT_FOUND);
     });
   }
 
