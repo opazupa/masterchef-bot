@@ -110,7 +110,6 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 			// When user enters a command
 			messages, err := command.Handle(&update, bot.Self.UserName, user)
 			if err == nil {
-				sentry.CaptureException(err)
 				funk.ForEach(*messages, func(message tgbotapi.MessageConfig) { bot.Send(message) })
 			}
 		}
