@@ -9,6 +9,7 @@ This is the node `GraphQL` API for **Masterchef** recipes.
     - WS subscriptions
 - Mongoose
 - JWT bearer auth
+- Sentry.io for error tracking
 
 ## [Schema](./schema.gql)
 
@@ -22,4 +23,4 @@ This is the node `GraphQL` API for **Masterchef** recipes.
 | `ENABLE_PLAYGROUND`   | `true/false` to enable graphql playground in `/grahpql`   |
 | `JWT_SECRET`          | <jwt_secret> for authentication                           |
 | `SENTRY_DSN`          | <your_dsn> to use with sentry                             | 
-| `SENTRY_ENVIRONMENT`  | <your_sentry_env> to use with sentry                      |
+| `SENTRY_ENVIRONMENT`  | <your_env> to use with sentry                             |
