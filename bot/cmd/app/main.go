@@ -75,6 +75,8 @@ func handleUpdates(bot *tgbotapi.BotAPI) {
 	}
 
 	for update := range updates {
+		// Set user info for sentry
+		sentry.CurrentHub().PushScope().SetExtra("user", getUser(update))
 
 		// Check if the user is registered!
 		user := usercollection.GetByUserName(getUser(update))
