@@ -50,7 +50,7 @@ const getAllUsers = async (): Promise<IUser[]> => {
  */
 const getUsers = async (ids: string[]): Promise<Map<string, IUser>> => {
   const users = await Users.find({ _id: { $in: ids } });
-  return new Map(users.map((user) => [user.id, user]));
+  return new Map(users.map((user) => [user._id.toString(), user]));
 };
 
 /**

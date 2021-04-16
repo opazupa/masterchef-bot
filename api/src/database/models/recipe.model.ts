@@ -22,7 +22,7 @@ interface IRecipe extends Document {
  */
 const recipeSchema: Schema = new Schema(
   {
-    UserID: { type: Schema.Types.ObjectId, ref: USER, required: true },
+    UserID: { type: Schema.Types.ObjectId, get: (v: Schema.Types.ObjectId) => v.toString(), ref: USER, required: true },
     Name: { type: Schema.Types.String, required: true },
     URL: { type: Schema.Types.String, required: true },
     Added: { type: Schema.Types.Date, required: true, default: Date.now },
@@ -79,7 +79,7 @@ const getRecipe = async (id: string): Promise<IRecipe | null> => {
  */
 const getRecipes = async (ids: string[]): Promise<Map<string, IRecipe>> => {
   const recipes = await Recipes.find({ _id: { $in: ids } });
-  return new Map(recipes.map((recipe) => [recipe.id, recipe]));
+  return new Map(recipes.map((recipe) => [recipe._id.toString(), recipe]));
 };
 
 /**
