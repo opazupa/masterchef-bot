@@ -1,6 +1,7 @@
 package recipeapi
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -45,11 +46,15 @@ func (recipe *Recipe) ToMessage(header string) (message string) {
 // Get duckduckgo search result
 func getDuckDuckGoSearchResult(query string) (html *goquery.Document, err error) {
 
-	response, err := http.Get(fmt.Sprintf("%s/html/?q=%s+recipe", recipeapi, url.QueryEscape(query)))
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/html?q=%s+recipe", recipeapi, url.QueryEscape(query)), nil)
+	req.Header.Set("User-Agent", "Mozilla/5.0")
+	response, err := client.Do(req)
 	if err != nil || response.StatusCode != http.StatusOK {
 		sentry.CaptureException(err)
-		log.Printf("Failed to get search results from duckduckgo. %s", err)
-		return nil, err
+		log.Printf("Failed to get search results from duckduckgo. %s (%v)", err, response.StatusCode)
+		return nil, errors.New("Failed to get search results from duckduckgo")
 	}
 	defer response.Body.Close()
 
