@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/thoas/go-funk"
+
 	selection "masterchef_bot/pkg/database/selectedrecipecollection"
 	"masterchef_bot/pkg/database/usercollection"
 
@@ -60,8 +62,9 @@ func getRecipeInfo(update *tgbotapi.Update) (name string, url string) {
 // Convert recipe results to InlineQueryResults
 func toInlineQueryResult(recipes *[]recipeapi.Recipe, isRegistered bool) *[]interface{} {
 
+	resultAmount := funk.MinInt([]int{len(*recipes), resultLimit}).(int)
 	results := make([]interface{}, 0)
-	for i, recipe := range (*recipes)[:resultLimit] {
+	for i, recipe := range (*recipes)[:resultAmount] {
 		results = append(results, tgbotapi.InlineQueryResultArticle{
 			Type:  "article",
 			ID:    strconv.Itoa(i + 1),
