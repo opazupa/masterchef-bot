@@ -72,7 +72,7 @@ func parseDuckDuckGoRecipes(html *goquery.Document) *[]Recipe {
 
 	var recipes []Recipe
 	html.Find(".links_main.links_deep.result__body").Each(func(i int, s *goquery.Selection) {
-		// For each item found, get the band and title
+		// For each item found, get url, title and desc
 		url, _ := s.Find("a.result__a").Attr("href")
 		title := strings.Split(s.Find("h2").Text(), " | ")[0]
 		desc := s.Find(".result__snippet").Text()
@@ -87,11 +87,13 @@ func parseDuckDuckGoRecipes(html *goquery.Document) *[]Recipe {
 }
 
 // Parse and decode URL
-func parseURL(encodedURL string) string {
+func parseURL(encodedURL string) (parsedUrl string) {
 	decodedURL, _ := url.QueryUnescape(encodedURL)
-	regex := regexp.MustCompile(`(https).*`)
+	// Remove link suffix
+	parsedUrl = strings.Split(decodedURL, "&rut=")[0]
 	// Remove link prefix
-	return regex.FindString(decodedURL)
+	regex := regexp.MustCompile(`(https).*`)
+	return regex.FindString(parsedUrl)
 }
 
 // Parse whitespaces
