@@ -59,7 +59,7 @@
     "helmet": "^3.22.0",
     "http": "0.0.1-security",
     "jsonwebtoken": "^8.5.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "mongoose": "^5.9.10",
     "ncp": "^2.0.0",
     "reflect-metadata": "^0.1.13",
